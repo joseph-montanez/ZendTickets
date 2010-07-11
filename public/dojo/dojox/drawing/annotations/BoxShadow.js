@@ -1,219 +1,122 @@
-dojo.provide("dojox.drawing.annotations.BoxShadow");
+/*
+	Copyright (c) 2004-2009, The Dojo Foundation All Rights Reserved.
+	Available via Academic Free License >= 2.1 OR the modified BSD license.
+	see: http://dojotoolkit.org/license for details
+*/
 
-dojox.drawing.annotations.BoxShadow = dojox.drawing.util.oo.declare(
-	// summary:
-	//		Creates a box shadow under solid objects. Can change the
-	//		shadow direction, color, size, and intensity. Can center
-	//		the shadow and make it a Glow.
-	// description:
-	//		This is a psuedo shadow, created by duplicating the
-	//		original stencil and increasing the line weight while
-	//		reducing the opacity. Therefore it will not work with
-	//		text. Also won't look very good if the Stencil has no
-	//		fill or is transparent. Can't do knockouts or inner
-	//		shadows. Currently can't do paths - while doable, it
-	//		will most likely choke IE into certain death.
-	//
-	function(/*Object*/options){
-		this.stencil = options.stencil;
-		this.util = options.stencil.util;
-		this.mouse = options.stencil.mouse;
-		this.style = options.stencil.style;
-		
-		var shadowDefaults = {
-			// summary:
-			//		When passing a shadow object into a stencil, that shadow
-			//		object will be mixed in with these defaults.
-			//
-			// size: Number, mult: Number
-			//		These two props work together. Both affect the size and quality
-			//		of the shadow. size affects the actual size and mult affects the
-			//		lineWidths that overlap to make the shadow. Generally you want a
-			//		bigger 'size' than 'mult'. The defaults are good for a shadow, but
-			//		you will want to increase them when making a glow.
-			//	TODO: Make this more clear or use other properties.
-			size:6,
-			mult:4,
-			// alpha: Float
-			//		Affects the alpha of the shadow. Because this is multiple shapes
-			//		overlapped, you want much less than you may think. .1 is pretty
-			//		dark and . is black. Higher numbers also give a sharper edge.
-			alpha:.05,
-			//	place: String
-			//		Tells the position of the shadow:
-			//			B: bottom
-			//			T: top
-			//			L: left
-			//			R: right
-			//			C: center, or a glow
-			//		Can be used in combinations such as BR, BL, L, T, etc. 'C' should
-			//		be used by itself.
-			place:"BR",
-			//	color: String
-			//		The color of the shadow or glow.
-			color:"#646464"
-		}
-		
-		delete options.stencil;
-		this.options = dojo.mixin(shadowDefaults, options);
-		this.options.color = new dojo.Color(this.options.color)
-		this.options.color.a = this.options.alpha;
-		
-		switch(this.stencil.shortType){
-			case "image":
-			case "rect":
-				this.method = "createForRect"; break;
-			case "ellipse":
-				this.method = "createForEllipse"; break;
-			case "line":
-				this.method = "createForLine"; break;
-			case "path":
-				this.method = "createForPath"; break;
-				// 	path is a bit of a hassle. Plus I think in IE it would be
-				//slower than than the political process. Maybe TODO.
-			default:
-				console.warn("A shadow cannot be made for Stencil type ", this.stencil.type);
-		}
-		
-		if(this.method){
-			this.render();
-			this.stencil.connectMult([
-				[this.stencil, "onTransform", this, "onTransform"],
-				[this.stencil, "render", this, "onRender"],
-				[this.stencil, "onDelete", this, "destroy"]
-			]);
-		}
-	},
-	{
-		showing:true,
-		render: function(){
-			if(this.container){
-				this.container.removeShape();
-			}
-			this.container = this.stencil.container.createGroup();
-			this.container.moveToBack();
-			
-			var o = this.options,
-				size = o.size,
-				mult = o.mult,
-				d = this.method == "createForPath"
-					? this.stencil.points
-					: this.stencil.data,
-				r = d.r || 1,
-				p = o.place,
-				c = o.color;
-			
-			this[this.method](o, size, mult, d, r, p, c);	
-		},
-		
-		hide: function(){
-			if(this.showing){
-				this.showing = false;
-				this.container.removeShape();
-			}
-		},
-		
-		show: function(){
-			if(!this.showing){
-				this.showing = true;
-				this.stencil.container.add(this.container);
-			}
-		},
-		
-		createForPath: function(o, size, mult, pts, r, p, c){
-			var sh = size * mult / 4,
-				shy = /B/.test(p) ? sh : /T/.test(p) ? sh*-1 : 0,
-				shx = /R/.test(p) ? sh : /L/.test(p) ? sh*-1 : 0;
-			
-			var closePath = true;
-			
-			for(var i=1;i<=size;i++){
-				var lineWidth = i * mult;
-				//var rect = this.container.createLine({x1:d.x1+shx, y1:d.y1+shy, x2:d.x2+shx, y2:d.y2+shy})
-				//	.setStroke({width:lineWidth, color:c, cap:"round"})		
-			
-				if(dojox.gfx.renderer=="svg"){
-					var strAr = [];
-					dojo.forEach(pts, function(o, i){
-						if(i==0){
-							strAr.push("M " + (o.x+shx) +" "+ (o.y+shy));
-						}else{
-							var cmd = o.t || "L ";
-							strAr.push(cmd + (o.x+shx) +" "+ (o.y+shy)); // Z + undefined works here
-						}
-					}, this);
-					if(closePath){
-						strAr.push("Z");
-					}
-					this.container.createPath(strAr.join(", ")).setStroke({width:lineWidth, color:c, cap:"round"})	
-					
-				}else{
-					// Leaving this code for VML. It seems slightly faster but times vary.
-					var pth = this.container.createPath({}).setStroke({width:lineWidth, color:c, cap:"round"})	
-					
-					dojo.forEach(this.points, function(o, i){
-						if(i==0 || o.t=="M"){
-							pth.moveTo(o.x+shx, o.y+shy);
-						}else if(o.t=="Z"){
-							closePath && pth.closePath();
-						}else{
-							pth.lineTo(o.x+shx, o.y+shy);
-						}
-					}, this);
-					
-					closePath && pth.closePath();
-				}
-			
-			
-			}
-		},
-		
-		createForLine: function(o, size, mult, d, r, p, c){
-			
-			var sh = size * mult / 4,
-				shy = /B/.test(p) ? sh : /T/.test(p) ? sh*-1 : 0,
-				shx = /R/.test(p) ? sh : /L/.test(p) ? sh*-1 : 0;
-			for(var i=1;i<=size;i++){
-				var lineWidth = i * mult;
-				this.container.createLine({x1:d.x1+shx, y1:d.y1+shy, x2:d.x2+shx, y2:d.y2+shy})
-					.setStroke({width:lineWidth, color:c, cap:"round"})		
-			}
-		},
-		createForEllipse: function(o, size, mult, d, r, p, c){
-		
-			var sh = size * mult / 8,
-				shy = /B/.test(p) ? sh : /T/.test(p) ? sh*-1 : 0,
-				shx = /R/.test(p) ? sh*.8 : /L/.test(p) ? sh*-.8 : 0;
-			
-			for(var i=1;i<=size;i++){
-				var lineWidth = i * mult;
-				this.container.createEllipse({cx:d.cx+shx, cy:d.cy+shy, rx:d.rx-sh, ry:d.ry-sh, r:r})
-					.setStroke({width:lineWidth, color:c})		
-			}
-		},
-		
-		createForRect: function(o, size, mult, d, r, p, c){
-			
-			var sh = size * mult / 2,
-				shy = /B/.test(p) ? sh : /T/.test(p) ? 0 : sh /2,
-				shx = /R/.test(p) ? sh : /L/.test(p) ? 0 : sh /2;
-			
-			for(var i=1;i<=size;i++){
-				var lineWidth = i * mult;
-				this.container.createRect({x:d.x+shx, y:d.y+shy, width:d.width-sh, height:d.height-sh, r:r})
-					.setStroke({width:lineWidth, color:c})		
-			}
-		},
-		onTransform: function(){
-			this.render();
-		},
-		onRender: function(){
-			this.container.moveToBack();
-		},
-		destroy: function(){
-			if(this.container){
-				this.container.removeShape();
-			}
-		}
-	}
-);
+
+if(!dojo._hasResource["dojox.drawing.annotations.BoxShadow"]){
+dojo._hasResource["dojox.drawing.annotations.BoxShadow"]=true;
+dojo.provide("dojox.drawing.annotations.BoxShadow");
+dojox.drawing.annotations.BoxShadow=dojox.drawing.util.oo.declare(function(_1){
+this.stencil=_1.stencil;
+this.util=_1.stencil.util;
+this.mouse=_1.stencil.mouse;
+this.style=_1.stencil.style;
+var _2={size:6,mult:4,alpha:0.05,place:"BR",color:"#646464"};
+delete _1.stencil;
+this.options=dojo.mixin(_2,_1);
+this.options.color=new dojo.Color(this.options.color);
+this.options.color.a=this.options.alpha;
+switch(this.stencil.shortType){
+case "image":
+case "rect":
+this.method="createForRect";
+break;
+case "ellipse":
+this.method="createForEllipse";
+break;
+case "line":
+this.method="createForLine";
+break;
+case "path":
+this.method="createForPath";
+break;
+default:
+console.warn("A shadow cannot be made for Stencil type ",this.stencil.type);
+}
+if(this.method){
+this.render();
+this.stencil.connectMult([[this.stencil,"onTransform",this,"onTransform"],[this.stencil,"render",this,"onRender"],[this.stencil,"onDelete",this,"destroy"]]);
+}
+},{showing:true,render:function(){
+if(this.container){
+this.container.removeShape();
+}
+this.container=this.stencil.container.createGroup();
+this.container.moveToBack();
+var o=this.options,_3=o.size,_4=o.mult,d=this.method=="createForPath"?this.stencil.points:this.stencil.data,r=d.r||1,p=o.place,c=o.color;
+this[this.method](o,_3,_4,d,r,p,c);
+},hide:function(){
+if(this.showing){
+this.showing=false;
+this.container.removeShape();
+}
+},show:function(){
+if(!this.showing){
+this.showing=true;
+this.stencil.container.add(this.container);
+}
+},createForPath:function(o,_5,_6,_7,r,p,c){
+var sh=_5*_6/4,_8=/B/.test(p)?sh:/T/.test(p)?sh*-1:0,_9=/R/.test(p)?sh:/L/.test(p)?sh*-1:0;
+var _a=true;
+for(var i=1;i<=_5;i++){
+var _b=i*_6;
+if(dojox.gfx.renderer=="svg"){
+var _c=[];
+dojo.forEach(_7,function(o,i){
+if(i==0){
+_c.push("M "+(o.x+_9)+" "+(o.y+_8));
+}else{
+var _d=o.t||"L ";
+_c.push(_d+(o.x+_9)+" "+(o.y+_8));
+}
+},this);
+if(_a){
+_c.push("Z");
+}
+this.container.createPath(_c.join(", ")).setStroke({width:_b,color:c,cap:"round"});
+}else{
+var _e=this.container.createPath({}).setStroke({width:_b,color:c,cap:"round"});
+dojo.forEach(this.points,function(o,i){
+if(i==0||o.t=="M"){
+_e.moveTo(o.x+_9,o.y+_8);
+}else{
+if(o.t=="Z"){
+_a&&_e.closePath();
+}else{
+_e.lineTo(o.x+_9,o.y+_8);
+}
+}
+},this);
+_a&&_e.closePath();
+}
+}
+},createForLine:function(o,_f,_10,d,r,p,c){
+var sh=_f*_10/4,shy=/B/.test(p)?sh:/T/.test(p)?sh*-1:0,shx=/R/.test(p)?sh:/L/.test(p)?sh*-1:0;
+for(var i=1;i<=_f;i++){
+var _11=i*_10;
+this.container.createLine({x1:d.x1+shx,y1:d.y1+shy,x2:d.x2+shx,y2:d.y2+shy}).setStroke({width:_11,color:c,cap:"round"});
+}
+},createForEllipse:function(o,_12,_13,d,r,p,c){
+var sh=_12*_13/8,shy=/B/.test(p)?sh:/T/.test(p)?sh*-1:0,shx=/R/.test(p)?sh*0.8:/L/.test(p)?sh*-0.8:0;
+for(var i=1;i<=_12;i++){
+var _14=i*_13;
+this.container.createEllipse({cx:d.cx+shx,cy:d.cy+shy,rx:d.rx-sh,ry:d.ry-sh,r:r}).setStroke({width:_14,color:c});
+}
+},createForRect:function(o,_15,_16,d,r,p,c){
+var sh=_15*_16/2,shy=/B/.test(p)?sh:/T/.test(p)?0:sh/2,shx=/R/.test(p)?sh:/L/.test(p)?0:sh/2;
+for(var i=1;i<=_15;i++){
+var _17=i*_16;
+this.container.createRect({x:d.x+shx,y:d.y+shy,width:d.width-sh,height:d.height-sh,r:r}).setStroke({width:_17,color:c});
+}
+},onTransform:function(){
+this.render();
+},onRender:function(){
+this.container.moveToBack();
+},destroy:function(){
+if(this.container){
+this.container.removeShape();
+}
+}});
+}

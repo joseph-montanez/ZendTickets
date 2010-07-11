@@ -1,5 +1,1 @@
-({
-        nomatchMessage: "Hasła nie są zgodne.",
-		badPasswordMessage: "Niepoprawne hasło."
-})
-
+({"badPasswordMessage":"Niepoprawne hasło.","nomatchMessage":"Hasła nie są zgodne."})

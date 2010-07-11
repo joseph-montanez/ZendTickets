@@ -1,5 +1,1 @@
-({
-next: "Seuraava",
-previous: "Edellinen",
-done: "Valmis"
-})
+({"next":"Seuraava","done":"Valmis","previous":"Edellinen"})

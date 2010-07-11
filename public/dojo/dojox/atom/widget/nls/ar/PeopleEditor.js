@@ -1,5 +1,1 @@
-({
-	add: "اضافة",
-	addAuthor: "اضافة مؤلف",
-	addContributor: "اضافة مشارك "
-})
+({"add":"اضافة","addAuthor":"اضافة مؤلف","addContributor":"اضافة مشارك "})

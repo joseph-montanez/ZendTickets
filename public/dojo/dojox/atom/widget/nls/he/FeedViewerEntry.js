@@ -1,3 +1,1 @@
-({
-	deleteButton: "[מחיקה]"
-})
+({"deleteButton":"[מחיקה]"})

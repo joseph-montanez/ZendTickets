@@ -1,13 +1,1 @@
-// generated from ldml/main/*.xml, xpath: ldml/numbers/currencies
-({
-	AUD_symbol:"AU$",
-	CAD_symbol:"CA$",
-	CHF_symbol:"Fr.",
-	CNY_symbol:"CN¥",
-	EUR_symbol:"€",
-	GBP_symbol:"£",
-	HKD_symbol:"HK$",
-	JPY_symbol:"JP¥",
-	USD_symbol:"US$"
-})
-                 
+({"CHF_symbol":"Fr.","JPY_symbol":"JP¥","HKD_symbol":"HK$","USD_symbol":"US$","CAD_symbol":"CA$","EUR_symbol":"€","CNY_symbol":"CN¥","GBP_symbol":"£","AUD_symbol":"AU$"})

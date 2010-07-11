@@ -1,4 +1,1 @@
-({
-	insertEntity: "記号の挿入"
-})
-
+({"insertEntity":"記号の挿入"})

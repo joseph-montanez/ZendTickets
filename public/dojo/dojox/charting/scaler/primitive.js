@@ -1,28 +1,26 @@
-dojo.provide("dojox.charting.scaler.primitive");
+/*
+	Copyright (c) 2004-2009, The Dojo Foundation All Rights Reserved.
+	Available via Academic Free License >= 2.1 OR the modified BSD license.
+	see: http://dojotoolkit.org/license for details
+*/
 
-dojox.charting.scaler.primitive = {
-	buildScaler: function(/*Number*/ min, /*Number*/ max, /*Number*/ span, /*Object*/ kwArgs){
-		return {
-			bounds: {
-				lower: min,
-				upper: max,
-				from:  min,
-				to:    max,
-				scale: span / (max - min),
-				span:  span
-			},
-			scaler: dojox.charting.scaler.primitive
-		};
-	},
-	buildTicks: function(/*Object*/ scaler, /*Object*/ kwArgs){
-		return {major: [], minor: [], micro: []};	// Object
-	},
-	getTransformerFromModel: function(/*Object*/ scaler){
-		var offset = scaler.bounds.from, scale = scaler.bounds.scale;
-		return function(x){ return (x - offset) * scale; };	// Function
-	},
-	getTransformerFromPlot: function(/*Object*/ scaler){
-		var offset = scaler.bounds.from, scale = scaler.bounds.scale;
-		return function(x){ return x / scale + offset; };	// Function
-	}
+
+if(!dojo._hasResource["dojox.charting.scaler.primitive"]){
+dojo._hasResource["dojox.charting.scaler.primitive"]=true;
+dojo.provide("dojox.charting.scaler.primitive");
+dojox.charting.scaler.primitive={buildScaler:function(_1,_2,_3,_4){
+return {bounds:{lower:_1,upper:_2,from:_1,to:_2,scale:_3/(_2-_1),span:_3},scaler:dojox.charting.scaler.primitive};
+},buildTicks:function(_5,_6){
+return {major:[],minor:[],micro:[]};
+},getTransformerFromModel:function(_7){
+var _8=_7.bounds.from,_9=_7.bounds.scale;
+return function(x){
+return (x-_8)*_9;
 };
+},getTransformerFromPlot:function(_a){
+var _b=_a.bounds.from,_c=_a.bounds.scale;
+return function(x){
+return x/_c+_b;
+};
+}};
+}

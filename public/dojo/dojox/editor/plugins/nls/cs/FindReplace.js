@@ -1,12 +1,1 @@
-({
-	"findLabel": "Hledaný řetězec:",
-	"replaceLabel": "Nahrazující řetězec:",
-	"findReplace": "Přepnout hledání/nahrazování",
-	"matchCase": "S rozlišením velkých a malých písmen", 
-	"backwards": "V opačném směru",
-	"replaceAll": "Všechny výskyty", 
-	"findButton": "Najít",
-	"replaceButton": "Nahradit",
-	"replaceDialogText": "Počet nahrazených výskytů: ${0}. "
-})
-
+({"backwards":"V opačném směru","findReplace":"Přepnout hledání/nahrazování","replaceAll":"Všechny výskyty","replaceDialogText":"Počet nahrazených výskytů: ${0}. ","replaceButton":"Nahradit","findButton":"Najít","findLabel":"Hledaný řetězec:","matchCase":"S rozlišením velkých a malých písmen","replaceLabel":"Nahrazující řetězec:"})

@@ -1,5 +1,1 @@
-({
-        nomatchMessage: "كلمة السرية غير مطابقة.",
-		badPasswordMessage: "كلمة سرية غير صحيحة."
-})
-
+({"badPasswordMessage":"كلمة سرية غير صحيحة.","nomatchMessage":"كلمة السرية غير مطابقة."})

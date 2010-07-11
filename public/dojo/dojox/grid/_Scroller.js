@@ -1,497 +1,403 @@
+/*
+	Copyright (c) 2004-2009, The Dojo Foundation All Rights Reserved.
+	Available via Academic Free License >= 2.1 OR the modified BSD license.
+	see: http://dojotoolkit.org/license for details
+*/
+
+
+if(!dojo._hasResource["dojox.grid._Scroller"]){
+dojo._hasResource["dojox.grid._Scroller"]=true;
 dojo.provide("dojox.grid._Scroller");
-
 (function(){
-	var indexInParent = function(inNode){
-		var i=0, n, p=inNode.parentNode;
-		while((n = p.childNodes[i++])){
-			if(n == inNode){
-				return i - 1;
-			}
-		}
-		return -1;
-	};
-	
-	var cleanNode = function(inNode){
-		if(!inNode){
-			return;
-		}
-		var filter = function(inW){
-			return inW.domNode && dojo.isDescendant(inW.domNode, inNode, true);
-		};
-		var ws = dijit.registry.filter(filter);
-		for(var i=0, w; (w=ws[i]); i++){
-			w.destroy();
-		}
-		delete ws;
-	};
-
-	var getTagName = function(inNodeOrId){
-		var node = dojo.byId(inNodeOrId);
-		return (node && node.tagName ? node.tagName.toLowerCase() : '');
-	};
-	
-	var nodeKids = function(inNode, inTag){
-		var result = [];
-		var i=0, n;
-		while((n = inNode.childNodes[i])){
-			i++;
-			if(getTagName(n) == inTag){
-				result.push(n);
-			}
-		}
-		return result;
-	};
-	
-	var divkids = function(inNode){
-		return nodeKids(inNode, 'div');
-	};
-
-	dojo.declare("dojox.grid._Scroller", null, {
-		constructor: function(inContentNodes){
-			this.setContentNodes(inContentNodes);
-			this.pageHeights = [];
-			this.pageNodes = [];
-			this.stack = [];
-		},
-		// specified
-		rowCount: 0, // total number of rows to manage
-		defaultRowHeight: 32, // default height of a row
-		keepRows: 100, // maximum number of rows that should exist at one time
-		contentNode: null, // node to contain pages
-		scrollboxNode: null, // node that controls scrolling
-		// calculated
-		defaultPageHeight: 0, // default height of a page
-		keepPages: 10, // maximum number of pages that should exists at one time
-		pageCount: 0,
-		windowHeight: 0,
-		firstVisibleRow: 0,
-		lastVisibleRow: 0,
-		averageRowHeight: 0, // the average height of a row
-		// private
-		page: 0,
-		pageTop: 0,
-		// init
-		init: function(inRowCount, inKeepRows, inRowsPerPage){
-			switch(arguments.length){
-				case 3: this.rowsPerPage = inRowsPerPage;
-				case 2: this.keepRows = inKeepRows;
-				case 1: this.rowCount = inRowCount;
-				default: break;
-			}
-			this.defaultPageHeight = this.defaultRowHeight * this.rowsPerPage;
-			this.pageCount = this._getPageCount(this.rowCount, this.rowsPerPage);
-			this.setKeepInfo(this.keepRows);
-			this.invalidate();
-			if(this.scrollboxNode){
-				this.scrollboxNode.scrollTop = 0;
-				this.scroll(0);
-				this.scrollboxNode.onscroll = dojo.hitch(this, 'onscroll');
-			}
-		},
-		_getPageCount: function(rowCount, rowsPerPage){
-			return rowCount ? (Math.ceil(rowCount / rowsPerPage) || 1) : 0;
-		},
-		destroy: function(){
-			this.invalidateNodes();
-			delete this.contentNodes;
-			delete this.contentNode;
-			delete this.scrollboxNode;
-		},
-		setKeepInfo: function(inKeepRows){
-			this.keepRows = inKeepRows;
-			this.keepPages = !this.keepRows ? this.keepPages : Math.max(Math.ceil(this.keepRows / this.rowsPerPage), 2);
-		},
-		// nodes
-		setContentNodes: function(inNodes){
-			this.contentNodes = inNodes;
-			this.colCount = (this.contentNodes ? this.contentNodes.length : 0);
-			this.pageNodes = [];
-			for(var i=0; i<this.colCount; i++){
-				this.pageNodes[i] = [];
-			}
-		},
-		getDefaultNodes: function(){
-			return this.pageNodes[0] || [];
-		},
-		// updating
-		invalidate: function(){
-			this._invalidating = true;
-			this.invalidateNodes();
-			this.pageHeights = [];
-			this.height = (this.pageCount ? (this.pageCount - 1)* this.defaultPageHeight + this.calcLastPageHeight() : 0);
-			this.resize();
-			this._invalidating = false;
-		},
-		updateRowCount: function(inRowCount){
-			this.invalidateNodes();
-			this.rowCount = inRowCount;
-			// update page count, adjust document height
-			var oldPageCount = this.pageCount;
-			if(oldPageCount === 0){
-				//We want to have at least 1px in height to keep scroller.  Otherwise with an
-				//empty grid you can't scroll to see the header.
-				this.height = 1;
-			}
-			this.pageCount = this._getPageCount(this.rowCount, this.rowsPerPage);
-			if(this.pageCount < oldPageCount){
-				for(var i=oldPageCount-1; i>=this.pageCount; i--){
-					this.height -= this.getPageHeight(i);
-					delete this.pageHeights[i];
-				}
-			}else if(this.pageCount > oldPageCount){
-				this.height += this.defaultPageHeight * (this.pageCount - oldPageCount - 1) + this.calcLastPageHeight();
-			}
-			this.resize();
-		},
-		// implementation for page manager
-		pageExists: function(inPageIndex){
-			return Boolean(this.getDefaultPageNode(inPageIndex));
-		},
-		measurePage: function(inPageIndex){
-			if(this.grid.rowHeight){
-				var height = this.grid.rowHeight + 1;
-				return ((inPageIndex + 1) * this.rowsPerPage > this.rowCount ?
-					this.rowCount - inPageIndex * this.rowsPerPage :
-					this.rowsPerPage) * height;
-					 
-			}
-			var n = this.getDefaultPageNode(inPageIndex);
-			return (n && n.innerHTML) ? n.offsetHeight : undefined;
-		},
-		positionPage: function(inPageIndex, inPos){
-			for(var i=0; i<this.colCount; i++){
-				this.pageNodes[i][inPageIndex].style.top = inPos + 'px';
-			}
-		},
-		repositionPages: function(inPageIndex){
-			var nodes = this.getDefaultNodes();
-			var last = 0;
-
-			for(var i=0; i<this.stack.length; i++){
-				last = Math.max(this.stack[i], last);
-			}
-			//
-			var n = nodes[inPageIndex];
-			var y = (n ? this.getPageNodePosition(n) + this.getPageHeight(inPageIndex) : 0);
-			for(var p=inPageIndex+1; p<=last; p++){
-				n = nodes[p];
-				if(n){
-					if(this.getPageNodePosition(n) == y){
-						return;
-					}
-					this.positionPage(p, y);
-				}
-				y += this.getPageHeight(p);
-			}
-		},
-		installPage: function(inPageIndex){
-			for(var i=0; i<this.colCount; i++){
-				this.contentNodes[i].appendChild(this.pageNodes[i][inPageIndex]);
-			}
-		},
-		preparePage: function(inPageIndex, inReuseNode){
-			var p = (inReuseNode ? this.popPage() : null);
-			for(var i=0; i<this.colCount; i++){
-				var nodes = this.pageNodes[i];
-				var new_p = (p === null ? this.createPageNode() : this.invalidatePageNode(p, nodes));
-				new_p.pageIndex = inPageIndex;
-				nodes[inPageIndex] = new_p;
-			}
-		},
-		// rendering implementation
-		renderPage: function(inPageIndex){
-			var nodes = [];
-			var i, j;
-			for(i=0; i<this.colCount; i++){
-				nodes[i] = this.pageNodes[i][inPageIndex];
-			}
-			for(i=0, j=inPageIndex*this.rowsPerPage; (i<this.rowsPerPage)&&(j<this.rowCount); i++, j++){
-				this.renderRow(j, nodes);
-			}
-		},
-		removePage: function(inPageIndex){
-			for(var i=0, j=inPageIndex*this.rowsPerPage; i<this.rowsPerPage; i++, j++){
-				this.removeRow(j);
-			}
-		},
-		destroyPage: function(inPageIndex){
-			for(var i=0; i<this.colCount; i++){
-				var n = this.invalidatePageNode(inPageIndex, this.pageNodes[i]);
-				if(n){
-					dojo.destroy(n);
-				}
-			}
-		},
-		pacify: function(inShouldPacify){
-		},
-		// pacification
-		pacifying: false,
-		pacifyTicks: 200,
-		setPacifying: function(inPacifying){
-			if(this.pacifying != inPacifying){
-				this.pacifying = inPacifying;
-				this.pacify(this.pacifying);
-			}
-		},
-		startPacify: function(){
-			this.startPacifyTicks = new Date().getTime();
-		},
-		doPacify: function(){
-			var result = (new Date().getTime() - this.startPacifyTicks) > this.pacifyTicks;
-			this.setPacifying(true);
-			this.startPacify();
-			return result;
-		},
-		endPacify: function(){
-			this.setPacifying(false);
-		},
-		// default sizing implementation
-		resize: function(){
-			if(this.scrollboxNode){
-				this.windowHeight = this.scrollboxNode.clientHeight;
-			}
-			for(var i=0; i<this.colCount; i++){
-				//We want to have 1px in height min to keep scroller.  Otherwise can't scroll
-				//and see header in empty grid.
-				dojox.grid.util.setStyleHeightPx(this.contentNodes[i], Math.max(1,this.height));
-			}
-			
-			// Calculate the average row height and update the defaults (row and page).
-			var needPage = (!this._invalidating);
-			if(!needPage){
-				var ah = this.grid.attr("autoHeight");
-				if(typeof ah == "number" && ah <= Math.min(this.rowsPerPage, this.rowCount)){
-					needPage = true;
-				}
-			}
-			if(needPage){
-				this.needPage(this.page, this.pageTop);
-			}
-			var rowsOnPage = (this.page < this.pageCount - 1) ? this.rowsPerPage : ((this.rowCount % this.rowsPerPage) || this.rowsPerPage);
-			var pageHeight = this.getPageHeight(this.page);
-			this.averageRowHeight = (pageHeight > 0 && rowsOnPage > 0) ? (pageHeight / rowsOnPage) : 0;
-		},
-		calcLastPageHeight: function(){
-			if(!this.pageCount){
-				return 0;
-			}
-			var lastPage = this.pageCount - 1;
-			var lastPageHeight = ((this.rowCount % this.rowsPerPage)||(this.rowsPerPage)) * this.defaultRowHeight;
-			this.pageHeights[lastPage] = lastPageHeight;
-			return lastPageHeight;
-		},
-		updateContentHeight: function(inDh){
-			this.height += inDh;
-			this.resize();
-		},
-		updatePageHeight: function(inPageIndex, fromBuild){
-			if(this.pageExists(inPageIndex)){
-				var oh = this.getPageHeight(inPageIndex);
-				var h = (this.measurePage(inPageIndex));
-				if(h === undefined){
-					h = oh;
-				}
-				this.pageHeights[inPageIndex] = h;
-				if(oh != h){
-					this.updateContentHeight(h - oh);
-					var ah = this.grid.attr("autoHeight");
-					if((typeof ah == "number" && ah > this.rowCount)||(ah === true && !fromBuild)){
-						this.grid.sizeChange();
-					}else{
-						this.repositionPages(inPageIndex);
-					}
-				}
-				return h;
-			}
-			return 0;
-		},
-		rowHeightChanged: function(inRowIndex){
-			this.updatePageHeight(Math.floor(inRowIndex / this.rowsPerPage), false);
-		},
-		// scroller core
-		invalidateNodes: function(){
-			while(this.stack.length){
-				this.destroyPage(this.popPage());
-			}
-		},
-		createPageNode: function(){
-			var p = document.createElement('div');
-			dojo.attr(p,"role","presentation");
-			p.style.position = 'absolute';
-			//p.style.width = '100%';
-			p.style[dojo._isBodyLtr() ? "left" : "right"] = '0';
-			return p;
-		},
-		getPageHeight: function(inPageIndex){
-			var ph = this.pageHeights[inPageIndex];
-			return (ph !== undefined ? ph : this.defaultPageHeight);
-		},
-		// FIXME: this is not a stack, it's a FIFO list
-		pushPage: function(inPageIndex){
-			return this.stack.push(inPageIndex);
-		},
-		popPage: function(){
-			return this.stack.shift();
-		},
-		findPage: function(inTop){
-			var i = 0, h = 0;
-			for(var ph = 0; i<this.pageCount; i++, h += ph){
-				ph = this.getPageHeight(i);
-				if(h + ph >= inTop){
-					break;
-				}
-			}
-			this.page = i;
-			this.pageTop = h;
-		},
-		buildPage: function(inPageIndex, inReuseNode, inPos){
-			this.preparePage(inPageIndex, inReuseNode);
-			this.positionPage(inPageIndex, inPos);
-			// order of operations is key below
-			this.installPage(inPageIndex);
-			this.renderPage(inPageIndex);
-			// order of operations is key above
-			this.pushPage(inPageIndex);
-		},
-		needPage: function(inPageIndex, inPos){
-			var h = this.getPageHeight(inPageIndex), oh = h;
-			if(!this.pageExists(inPageIndex)){
-				this.buildPage(inPageIndex, this.keepPages&&(this.stack.length >= this.keepPages), inPos);
-				h = this.updatePageHeight(inPageIndex, true);
-			}else{
-				this.positionPage(inPageIndex, inPos);
-			}
-			return h;
-		},
-		onscroll: function(){
-			this.scroll(this.scrollboxNode.scrollTop);
-		},
-		scroll: function(inTop){
-			this.grid.scrollTop = inTop;
-			if(this.colCount){
-				this.startPacify();
-				this.findPage(inTop);
-				var h = this.height;
-				var b = this.getScrollBottom(inTop);
-				for(var p=this.page, y=this.pageTop; (p<this.pageCount)&&((b<0)||(y<b)); p++){
-					y += this.needPage(p, y);
-				}
-				this.firstVisibleRow = this.getFirstVisibleRow(this.page, this.pageTop, inTop);
-				this.lastVisibleRow = this.getLastVisibleRow(p - 1, y, b);
-				// indicates some page size has been updated
-				if(h != this.height){
-					this.repositionPages(p-1);
-				}
-				this.endPacify();
-			}
-		},
-		getScrollBottom: function(inTop){
-			return (this.windowHeight >= 0 ? inTop + this.windowHeight : -1);
-		},
-		// events
-		processNodeEvent: function(e, inNode){
-			var t = e.target;
-			while(t && (t != inNode) && t.parentNode && (t.parentNode.parentNode != inNode)){
-				t = t.parentNode;
-			}
-			if(!t || !t.parentNode || (t.parentNode.parentNode != inNode)){
-				return false;
-			}
-			var page = t.parentNode;
-			e.topRowIndex = page.pageIndex * this.rowsPerPage;
-			e.rowIndex = e.topRowIndex + indexInParent(t);
-			e.rowTarget = t;
-			return true;
-		},
-		processEvent: function(e){
-			return this.processNodeEvent(e, this.contentNode);
-		},
-		// virtual rendering interface
-		renderRow: function(inRowIndex, inPageNode){
-		},
-		removeRow: function(inRowIndex){
-		},
-		// page node operations
-		getDefaultPageNode: function(inPageIndex){
-			return this.getDefaultNodes()[inPageIndex];
-		},
-		positionPageNode: function(inNode, inPos){
-		},
-		getPageNodePosition: function(inNode){
-			return inNode.offsetTop;
-		},
-		invalidatePageNode: function(inPageIndex, inNodes){
-			var p = inNodes[inPageIndex];
-			if(p){
-				delete inNodes[inPageIndex];
-				this.removePage(inPageIndex, p);
-				cleanNode(p);
-				p.innerHTML = '';
-			}
-			return p;
-		},
-		// scroll control
-		getPageRow: function(inPage){
-			return inPage * this.rowsPerPage;
-		},
-		getLastPageRow: function(inPage){
-			return Math.min(this.rowCount, this.getPageRow(inPage + 1)) - 1;
-		},
-		getFirstVisibleRow: function(inPage, inPageTop, inScrollTop){
-			if(!this.pageExists(inPage)){
-				return 0;
-			}
-			var row = this.getPageRow(inPage);
-			var nodes = this.getDefaultNodes();
-			var rows = divkids(nodes[inPage]);
-			for(var i=0,l=rows.length; i<l && inPageTop<inScrollTop; i++, row++){
-				inPageTop += rows[i].offsetHeight;
-			}
-			return (row ? row - 1 : row);
-		},
-		getLastVisibleRow: function(inPage, inBottom, inScrollBottom){
-			if(!this.pageExists(inPage)){
-				return 0;
-			}
-			var nodes = this.getDefaultNodes();
-			var row = this.getLastPageRow(inPage);
-			var rows = divkids(nodes[inPage]);
-			for(var i=rows.length-1; i>=0 && inBottom>inScrollBottom; i--, row--){
-				inBottom -= rows[i].offsetHeight;
-			}
-			return row + 1;
-		},
-		findTopRow: function(inScrollTop){
-			var nodes = this.getDefaultNodes();
-			var rows = divkids(nodes[this.page]);
-			for(var i=0,l=rows.length,t=this.pageTop,h; i<l; i++){
-				h = rows[i].offsetHeight;
-				t += h;
-				if(t >= inScrollTop){
-					this.offset = h - (t - inScrollTop);
-					return i + this.page * this.rowsPerPage;
-				}
-			}
-			return -1;
-		},
-		findScrollTop: function(inRow){
-			var rowPage = Math.floor(inRow / this.rowsPerPage);
-			var t = 0;
-			var i, l;
-			for(i=0; i<rowPage; i++){
-				t += this.getPageHeight(i);
-			}
-			this.pageTop = t;
-			this.needPage(rowPage, this.pageTop);
-
-			var nodes = this.getDefaultNodes();
-			var rows = divkids(nodes[rowPage]);
-			var r = inRow - this.rowsPerPage * rowPage;
-			for(i=0,l=rows.length; i<l && i<r; i++){
-				t += rows[i].offsetHeight;
-			}
-			return t;
-		},
-		dummy: 0
-	});
+var _1=function(_2){
+var i=0,n,p=_2.parentNode;
+while((n=p.childNodes[i++])){
+if(n==_2){
+return i-1;
+}
+}
+return -1;
+};
+var _3=function(_4){
+if(!_4){
+return;
+}
+var _5=function(_6){
+return _6.domNode&&dojo.isDescendant(_6.domNode,_4,true);
+};
+var ws=dijit.registry.filter(_5);
+for(var i=0,w;(w=ws[i]);i++){
+w.destroy();
+}
+delete ws;
+};
+var _7=function(_8){
+var _9=dojo.byId(_8);
+return (_9&&_9.tagName?_9.tagName.toLowerCase():"");
+};
+var _a=function(_b,_c){
+var _d=[];
+var i=0,n;
+while((n=_b.childNodes[i])){
+i++;
+if(_7(n)==_c){
+_d.push(n);
+}
+}
+return _d;
+};
+var _e=function(_f){
+return _a(_f,"div");
+};
+dojo.declare("dojox.grid._Scroller",null,{constructor:function(_10){
+this.setContentNodes(_10);
+this.pageHeights=[];
+this.pageNodes=[];
+this.stack=[];
+},rowCount:0,defaultRowHeight:32,keepRows:100,contentNode:null,scrollboxNode:null,defaultPageHeight:0,keepPages:10,pageCount:0,windowHeight:0,firstVisibleRow:0,lastVisibleRow:0,averageRowHeight:0,page:0,pageTop:0,init:function(_11,_12,_13){
+switch(arguments.length){
+case 3:
+this.rowsPerPage=_13;
+case 2:
+this.keepRows=_12;
+case 1:
+this.rowCount=_11;
+default:
+break;
+}
+this.defaultPageHeight=this.defaultRowHeight*this.rowsPerPage;
+this.pageCount=this._getPageCount(this.rowCount,this.rowsPerPage);
+this.setKeepInfo(this.keepRows);
+this.invalidate();
+if(this.scrollboxNode){
+this.scrollboxNode.scrollTop=0;
+this.scroll(0);
+this.scrollboxNode.onscroll=dojo.hitch(this,"onscroll");
+}
+},_getPageCount:function(_14,_15){
+return _14?(Math.ceil(_14/_15)||1):0;
+},destroy:function(){
+this.invalidateNodes();
+delete this.contentNodes;
+delete this.contentNode;
+delete this.scrollboxNode;
+},setKeepInfo:function(_16){
+this.keepRows=_16;
+this.keepPages=!this.keepRows?this.keepPages:Math.max(Math.ceil(this.keepRows/this.rowsPerPage),2);
+},setContentNodes:function(_17){
+this.contentNodes=_17;
+this.colCount=(this.contentNodes?this.contentNodes.length:0);
+this.pageNodes=[];
+for(var i=0;i<this.colCount;i++){
+this.pageNodes[i]=[];
+}
+},getDefaultNodes:function(){
+return this.pageNodes[0]||[];
+},invalidate:function(){
+this._invalidating=true;
+this.invalidateNodes();
+this.pageHeights=[];
+this.height=(this.pageCount?(this.pageCount-1)*this.defaultPageHeight+this.calcLastPageHeight():0);
+this.resize();
+this._invalidating=false;
+},updateRowCount:function(_18){
+this.invalidateNodes();
+this.rowCount=_18;
+var _19=this.pageCount;
+if(_19===0){
+this.height=1;
+}
+this.pageCount=this._getPageCount(this.rowCount,this.rowsPerPage);
+if(this.pageCount<_19){
+for(var i=_19-1;i>=this.pageCount;i--){
+this.height-=this.getPageHeight(i);
+delete this.pageHeights[i];
+}
+}else{
+if(this.pageCount>_19){
+this.height+=this.defaultPageHeight*(this.pageCount-_19-1)+this.calcLastPageHeight();
+}
+}
+this.resize();
+},pageExists:function(_1a){
+return Boolean(this.getDefaultPageNode(_1a));
+},measurePage:function(_1b){
+if(this.grid.rowHeight){
+var _1c=this.grid.rowHeight+1;
+return ((_1b+1)*this.rowsPerPage>this.rowCount?this.rowCount-_1b*this.rowsPerPage:this.rowsPerPage)*_1c;
+}
+var n=this.getDefaultPageNode(_1b);
+return (n&&n.innerHTML)?n.offsetHeight:undefined;
+},positionPage:function(_1d,_1e){
+for(var i=0;i<this.colCount;i++){
+this.pageNodes[i][_1d].style.top=_1e+"px";
+}
+},repositionPages:function(_1f){
+var _20=this.getDefaultNodes();
+var _21=0;
+for(var i=0;i<this.stack.length;i++){
+_21=Math.max(this.stack[i],_21);
+}
+var n=_20[_1f];
+var y=(n?this.getPageNodePosition(n)+this.getPageHeight(_1f):0);
+for(var p=_1f+1;p<=_21;p++){
+n=_20[p];
+if(n){
+if(this.getPageNodePosition(n)==y){
+return;
+}
+this.positionPage(p,y);
+}
+y+=this.getPageHeight(p);
+}
+},installPage:function(_22){
+for(var i=0;i<this.colCount;i++){
+this.contentNodes[i].appendChild(this.pageNodes[i][_22]);
+}
+},preparePage:function(_23,_24){
+var p=(_24?this.popPage():null);
+for(var i=0;i<this.colCount;i++){
+var _25=this.pageNodes[i];
+var _26=(p===null?this.createPageNode():this.invalidatePageNode(p,_25));
+_26.pageIndex=_23;
+_25[_23]=_26;
+}
+},renderPage:function(_27){
+var _28=[];
+var i,j;
+for(i=0;i<this.colCount;i++){
+_28[i]=this.pageNodes[i][_27];
+}
+for(i=0,j=_27*this.rowsPerPage;(i<this.rowsPerPage)&&(j<this.rowCount);i++,j++){
+this.renderRow(j,_28);
+}
+},removePage:function(_29){
+for(var i=0,j=_29*this.rowsPerPage;i<this.rowsPerPage;i++,j++){
+this.removeRow(j);
+}
+},destroyPage:function(_2a){
+for(var i=0;i<this.colCount;i++){
+var n=this.invalidatePageNode(_2a,this.pageNodes[i]);
+if(n){
+dojo.destroy(n);
+}
+}
+},pacify:function(_2b){
+},pacifying:false,pacifyTicks:200,setPacifying:function(_2c){
+if(this.pacifying!=_2c){
+this.pacifying=_2c;
+this.pacify(this.pacifying);
+}
+},startPacify:function(){
+this.startPacifyTicks=new Date().getTime();
+},doPacify:function(){
+var _2d=(new Date().getTime()-this.startPacifyTicks)>this.pacifyTicks;
+this.setPacifying(true);
+this.startPacify();
+return _2d;
+},endPacify:function(){
+this.setPacifying(false);
+},resize:function(){
+if(this.scrollboxNode){
+this.windowHeight=this.scrollboxNode.clientHeight;
+}
+for(var i=0;i<this.colCount;i++){
+dojox.grid.util.setStyleHeightPx(this.contentNodes[i],Math.max(1,this.height));
+}
+var _2e=(!this._invalidating);
+if(!_2e){
+var ah=this.grid.attr("autoHeight");
+if(typeof ah=="number"&&ah<=Math.min(this.rowsPerPage,this.rowCount)){
+_2e=true;
+}
+}
+if(_2e){
+this.needPage(this.page,this.pageTop);
+}
+var _2f=(this.page<this.pageCount-1)?this.rowsPerPage:((this.rowCount%this.rowsPerPage)||this.rowsPerPage);
+var _30=this.getPageHeight(this.page);
+this.averageRowHeight=(_30>0&&_2f>0)?(_30/_2f):0;
+},calcLastPageHeight:function(){
+if(!this.pageCount){
+return 0;
+}
+var _31=this.pageCount-1;
+var _32=((this.rowCount%this.rowsPerPage)||(this.rowsPerPage))*this.defaultRowHeight;
+this.pageHeights[_31]=_32;
+return _32;
+},updateContentHeight:function(_33){
+this.height+=_33;
+this.resize();
+},updatePageHeight:function(_34,_35){
+if(this.pageExists(_34)){
+var oh=this.getPageHeight(_34);
+var h=(this.measurePage(_34));
+if(h===undefined){
+h=oh;
+}
+this.pageHeights[_34]=h;
+if(oh!=h){
+this.updateContentHeight(h-oh);
+var ah=this.grid.attr("autoHeight");
+if((typeof ah=="number"&&ah>this.rowCount)||(ah===true&&!_35)){
+this.grid.sizeChange();
+}else{
+this.repositionPages(_34);
+}
+}
+return h;
+}
+return 0;
+},rowHeightChanged:function(_36){
+this.updatePageHeight(Math.floor(_36/this.rowsPerPage),false);
+},invalidateNodes:function(){
+while(this.stack.length){
+this.destroyPage(this.popPage());
+}
+},createPageNode:function(){
+var p=document.createElement("div");
+dojo.attr(p,"role","presentation");
+p.style.position="absolute";
+p.style[dojo._isBodyLtr()?"left":"right"]="0";
+return p;
+},getPageHeight:function(_37){
+var ph=this.pageHeights[_37];
+return (ph!==undefined?ph:this.defaultPageHeight);
+},pushPage:function(_38){
+return this.stack.push(_38);
+},popPage:function(){
+return this.stack.shift();
+},findPage:function(_39){
+var i=0,h=0;
+for(var ph=0;i<this.pageCount;i++,h+=ph){
+ph=this.getPageHeight(i);
+if(h+ph>=_39){
+break;
+}
+}
+this.page=i;
+this.pageTop=h;
+},buildPage:function(_3a,_3b,_3c){
+this.preparePage(_3a,_3b);
+this.positionPage(_3a,_3c);
+this.installPage(_3a);
+this.renderPage(_3a);
+this.pushPage(_3a);
+},needPage:function(_3d,_3e){
+var h=this.getPageHeight(_3d),oh=h;
+if(!this.pageExists(_3d)){
+this.buildPage(_3d,this.keepPages&&(this.stack.length>=this.keepPages),_3e);
+h=this.updatePageHeight(_3d,true);
+}else{
+this.positionPage(_3d,_3e);
+}
+return h;
+},onscroll:function(){
+this.scroll(this.scrollboxNode.scrollTop);
+},scroll:function(_3f){
+this.grid.scrollTop=_3f;
+if(this.colCount){
+this.startPacify();
+this.findPage(_3f);
+var h=this.height;
+var b=this.getScrollBottom(_3f);
+for(var p=this.page,y=this.pageTop;(p<this.pageCount)&&((b<0)||(y<b));p++){
+y+=this.needPage(p,y);
+}
+this.firstVisibleRow=this.getFirstVisibleRow(this.page,this.pageTop,_3f);
+this.lastVisibleRow=this.getLastVisibleRow(p-1,y,b);
+if(h!=this.height){
+this.repositionPages(p-1);
+}
+this.endPacify();
+}
+},getScrollBottom:function(_40){
+return (this.windowHeight>=0?_40+this.windowHeight:-1);
+},processNodeEvent:function(e,_41){
+var t=e.target;
+while(t&&(t!=_41)&&t.parentNode&&(t.parentNode.parentNode!=_41)){
+t=t.parentNode;
+}
+if(!t||!t.parentNode||(t.parentNode.parentNode!=_41)){
+return false;
+}
+var _42=t.parentNode;
+e.topRowIndex=_42.pageIndex*this.rowsPerPage;
+e.rowIndex=e.topRowIndex+_1(t);
+e.rowTarget=t;
+return true;
+},processEvent:function(e){
+return this.processNodeEvent(e,this.contentNode);
+},renderRow:function(_43,_44){
+},removeRow:function(_45){
+},getDefaultPageNode:function(_46){
+return this.getDefaultNodes()[_46];
+},positionPageNode:function(_47,_48){
+},getPageNodePosition:function(_49){
+return _49.offsetTop;
+},invalidatePageNode:function(_4a,_4b){
+var p=_4b[_4a];
+if(p){
+delete _4b[_4a];
+this.removePage(_4a,p);
+_3(p);
+p.innerHTML="";
+}
+return p;
+},getPageRow:function(_4c){
+return _4c*this.rowsPerPage;
+},getLastPageRow:function(_4d){
+return Math.min(this.rowCount,this.getPageRow(_4d+1))-1;
+},getFirstVisibleRow:function(_4e,_4f,_50){
+if(!this.pageExists(_4e)){
+return 0;
+}
+var row=this.getPageRow(_4e);
+var _51=this.getDefaultNodes();
+var _52=_e(_51[_4e]);
+for(var i=0,l=_52.length;i<l&&_4f<_50;i++,row++){
+_4f+=_52[i].offsetHeight;
+}
+return (row?row-1:row);
+},getLastVisibleRow:function(_53,_54,_55){
+if(!this.pageExists(_53)){
+return 0;
+}
+var _56=this.getDefaultNodes();
+var row=this.getLastPageRow(_53);
+var _57=_e(_56[_53]);
+for(var i=_57.length-1;i>=0&&_54>_55;i--,row--){
+_54-=_57[i].offsetHeight;
+}
+return row+1;
+},findTopRow:function(_58){
+var _59=this.getDefaultNodes();
+var _5a=_e(_59[this.page]);
+for(var i=0,l=_5a.length,t=this.pageTop,h;i<l;i++){
+h=_5a[i].offsetHeight;
+t+=h;
+if(t>=_58){
+this.offset=h-(t-_58);
+return i+this.page*this.rowsPerPage;
+}
+}
+return -1;
+},findScrollTop:function(_5b){
+var _5c=Math.floor(_5b/this.rowsPerPage);
+var t=0;
+var i,l;
+for(i=0;i<_5c;i++){
+t+=this.getPageHeight(i);
+}
+this.pageTop=t;
+this.needPage(_5c,this.pageTop);
+var _5d=this.getDefaultNodes();
+var _5e=_e(_5d[_5c]);
+var r=_5b-this.rowsPerPage*_5c;
+for(i=0,l=_5e.length;i<l&&i<r;i++){
+t+=_5e[i].offsetHeight;
+}
+return t;
+},dummy:0});
 })();
+}

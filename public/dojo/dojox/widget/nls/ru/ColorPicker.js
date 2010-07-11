@@ -1,10 +1,1 @@
-({
-redLabel: "к",
-greenLabel: "з",
-blueLabel: "с",
-hueLabel: "о",
-saturationLabel: "н",
-valueLabel: "з", /* aka intensity or brightness */
-hexLabel: "шест"
-})
-
+({"redLabel":"к","valueLabel":"з","hexLabel":"шест","hueLabel":"о","saturationLabel":"н","greenLabel":"з","blueLabel":"с","degLabel":"°"})

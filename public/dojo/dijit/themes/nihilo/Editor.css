@@ -1,26 +1,21 @@
 .dijitIEFixedToolbar {
 	position:absolute;
-	/* top:0; */
+	
 	top: expression(eval((document.documentElement||document.body).scrollTop));
 }
-
 .nihilo .dijitToolbar .dijitToolbarSeparator {
 	background: url('images/editor.gif');
 }
-
-/**** ICONS *****/
-
 .nihilo .dijitEditorIcon {
-	background-image: url('images/editor.gif'); /* editor icons sprite image */
+	background-image: url('images/editor.gif'); 
 	background-repeat: no-repeat;
 	width: 18px;
 	height: 18px;
 	text-align: center;
 }
 .nihilo .dijitDisabled .dijitEditorIcon {
-	background-image: url('images/editorDisabled.gif'); /* editor icons sprite image */
+	background-image: url('images/editorDisabled.gif'); 
 }
-
 .nihilo .dijitEditorIconSep { background-position: 0px; }
 .nihilo .dijitEditorIconBackColor { background-position: -18px; }
 .nihilo .dijitEditorIconBold { background-position: -36px; }
@@ -60,8 +55,11 @@
 .nihilo .dijitEditorIconUnderline { background-position: -648px; }
 .nihilo .dijitEditorIconUndo { background-position: -666px; }
 .nihilo .dijitEditorIconWikiword { background-position: -684px; }
-.nihilo .dijitEditorIconToggleDir { background-position: -540px; /* padding: 0; margin: 0; color:#555555;
-									font-family:verdana,arial,sans-serif; font-weight: 800; font-size: 70%; */}
+.nihilo .dijitEditorIconToggleDir { background-position: -540px; }
 .nihilo .dijitEditorIconTabIndent { background-position: -702px; }
 .nihilo .dijitEditorIconSelectAll { background-position: -720px; }
 .nihilo .dijitEditorIconUnlink { background-position: -738px; }
+.nihilo .dijitEditorIconFullScreen { background-position: -756px; }
+.nihilo .dijitEditorIconViewSource { background-position: -774px; }
+.nihilo .dijitEditorIconPrint { background-position: -792px; }
+.nihilo .dijitEditorIconNewPage { background-position: -810px; }

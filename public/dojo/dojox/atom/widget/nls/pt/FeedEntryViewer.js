@@ -1,11 +1,1 @@
-({
-	displayOptions: "[exibir opções]",
-	title: "Título",
-	authors: "Autores",
-	contributors: "Contribuidores",
-	id: "ID",
-	close: "[fechar]",
-	updated: "Atualizado",
-	summary: "Resumo",
-	content: "Conteúdo"
-})
+({"close":"[fechar]","title":"Título","authors":"Autores","summary":"Resumo","content":"Conteúdo","contributors":"Contribuidores","updated":"Atualizado","displayOptions":"[exibir opções]","id":"ID"})

@@ -1,5 +1,1 @@
-({
-        nomatchMessage: "As senhas não correspondem.",
-		badPasswordMessage: "Senha Inválida."
-})
-
+({"badPasswordMessage":"Senha Inválida.","nomatchMessage":"As senhas não correspondem."})

@@ -1,10 +1,1 @@
-({
-	"nodeActions": "${nodeName}: действия",
-	"selectContents": "Выбрать содержимое",
-	"selectElement": "Выбрать элемент",
-	"deleteElement": "Удалить элемент",
-	"deleteContents": "Удалить содержимое",
-	"moveStart": "Поместить курсор в начало",
-	"moveEnd": "Поместить курсор в конец"
-})
-
+({"selectContents":"Выбрать содержимое","deleteElement":"Удалить элемент","moveEnd":"Поместить курсор в конец","deleteContents":"Удалить содержимое","nodeActions":"${nodeName}: действия","selectElement":"Выбрать элемент","moveStart":"Поместить курсор в начало"})

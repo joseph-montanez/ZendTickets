@@ -1,2 +1,7 @@
-<?php Zend_Dojo::enableView($this); ?>
-<br /><br /><center>View script for controller <b>Install</b> and script/action name <b>index</b></center>
+<?php
+$this->dojo()->enable()
+        ->requireModule('dijit.layout.ContentPane');
+?>
+<div dojoType="dijit.layout.ContentPane">
+    <br /><br /><center>View script for controller <b>Install</b> and script/action name <b>index</b></center>
+</div>

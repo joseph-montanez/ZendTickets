@@ -1,7 +1,1 @@
-({
-	createLinkTitle: "Ιδιότητες διασύνδεσης",
-	insertImageTitle: "Ιδιότητες εικόνας",
-	url: "Διεύθυνση URL:",
-	text: "Περιγραφή:",
-	set: "Ορισμός"
-})
+({"set":"Ορισμός","text":"Περιγραφή:","insertImageTitle":"Ιδιότητες εικόνας","url":"Διεύθυνση URL:","createLinkTitle":"Ιδιότητες διασύνδεσης","newWindow":"New Window","topWindow":"Topmost Window","target":"Target:","parentWindow":"Parent Window","currentWindow":"Current Window"})

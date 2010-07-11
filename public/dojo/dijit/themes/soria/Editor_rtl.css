@@ -1,12 +1,10 @@
-/* Editor */
+
 .dijitRtl .soria .dijitEditorIcon {
-	background-image: url('images/editor_rtl.gif'); /* editor icons sprite image */
+	background-image: url('images/editor_rtl.gif'); 
 }
 .dijitRtl .soria .dijitDisabled .dijitEditorIcon {
-	background-image: url('images/editorDisabled_rtl.gif'); /* editor icons sprite image */
+	background-image: url('images/editorDisabled_rtl.gif'); 
 }
-
-/* Toolbar */
 .dijitRtl .soria .dijitToolbar .dijitToolbarSeparator {
 	background-image: url('images/editor_rtl.gif');
 }

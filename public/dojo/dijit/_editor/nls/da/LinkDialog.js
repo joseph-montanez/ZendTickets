@@ -1,7 +1,1 @@
-({
-	createLinkTitle: "Linkegenskaber",
-	insertImageTitle: "Billedegenskaber",
-	url: "URL:",
-	text: "Beskrivelse:",
-	set: "Definér"
-})
+({"set":"Definér","text":"Beskrivelse:","insertImageTitle":"Billedegenskaber","url":"URL:","createLinkTitle":"Linkegenskaber","newWindow":"New Window","topWindow":"Topmost Window","target":"Target:","parentWindow":"Parent Window","currentWindow":"Current Window"})

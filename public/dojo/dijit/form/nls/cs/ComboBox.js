@@ -1,4 +1,1 @@
-({
-		previousMessage: "Předchozí volby",
-		nextMessage: "Další volby"
-})
+({"previousMessage":"Předchozí volby","nextMessage":"Další volby"})

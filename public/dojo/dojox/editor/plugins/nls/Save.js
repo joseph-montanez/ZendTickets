@@ -1,3 +1,1 @@
-({
-	"save": "Save"
-})
+({"save":"Save"})

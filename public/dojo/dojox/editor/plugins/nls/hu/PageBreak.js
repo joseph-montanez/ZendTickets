@@ -1,4 +1,1 @@
-({
-	"pageBreak": "Oldaltörés"
-})
-
+({"pageBreak":"Oldaltörés"})

@@ -4,6 +4,12 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
   <title>Zend Framework Quickstart Application</title>
   <?= $this->dojo() ?>
+  <?php if ($this->dojo()->isEnabled()) {
+    $this->dojo()->setLocalPath('/dojo/dojo.js')
+                 ->addStyleSheetModule('dijit.themes.tundra');
+    echo $this->dojo();
+   }
+   ?>
   <?= $this->headLink()->appendStylesheet('/css/global.css') ?>
   <?= $this->headScript() ?>
 </head> 
@@ -29,6 +35,6 @@
 </div>
 
 <?php echo $this->layout()->content ?>
-
+<?php echo $this->inlineScript() ?>
 </body>
 </html>
