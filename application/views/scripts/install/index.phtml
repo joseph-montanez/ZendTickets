@@ -1,7 +1,59 @@
 <?php
-$this->dojo()->enable()
-        ->requireModule('dijit.layout.ContentPane');
+$this->dojo()->enable();
+$this->dojo()->requireModule('dijit.layout.BorderContainer');
+$this->dojo()->requireModule('dijit.layout.ContentPane');
+$this->dojo()->requireModule('dijit.layout.AccordionContainer');
+$this->dojo()->requireModule('dijit.form.Button');
 ?>
-<div dojoType="dijit.layout.ContentPane">
-    <br /><br /><center>View script for controller <b>Install</b> and script/action name <b>index</b></center>
+<h1>ZendTickets Installer</h1>
+<div id="uiContainer" style="border: 1px solid #ccc">
 </div>
+<div id="disclaimer" style="display: none">
+    <p>
+        This is a highly experimental php application, so use at your own
+        digression.
+    </p>
+</div>
+<script type="text/javascript">
+    dojo.addOnLoad(function() {
+        var outerBc = new dijit.layout.BorderContainer({
+            "design": "sidebar",
+            "style": "height: 400px;"
+        },
+        "uiContainer");
+
+        var leftSidebar = new dijit.layout.ContentPane({
+            "title": "Sidebar",
+            "region": "leading",
+            "style": "width: 15%;",
+            "splitter": "true",
+            "id": "leftSidebar",
+            "content": "dfksfkjdh"
+        });
+        outerBc.addChild(leftSidebar);
+
+        var rightContent = new dijit.layout.BorderContainer({
+            "id": "uiContent",
+            "region": "center"
+        });
+
+        var topContent = new dijit.layout.ContentPane({
+            "region": "center",
+            "splitter": "true"
+        });
+        rightContent.addChild(topContent);
+
+        var bottomContent = new dijit.layout.ContentPane({
+            "region": "bottom",
+            "style": "height: 100px;",
+            "splitter": "true"
+        });
+        rightContent.addChild(bottomContent);
+
+        outerBc.addChild(rightContent);
+        //leftSidebar.startup();
+        //rightContent.startup();
+        outerBc.startup();
+
+    });
+</script>

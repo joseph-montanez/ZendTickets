@@ -1,6 +1,6 @@
 /* 
-    Document   : global.css
-    Created on : Jul 10, 2010, 10:31:15 PM
+    Document   : zftickets
+    Created on : Jul 11, 2010, 4:26:26 AM
     Author     : joseph
     Description:
         Purpose of the stylesheet follows.
@@ -13,13 +13,4 @@
 
 root { 
     display: block;
-}
-
-body {
-    background: #F5F5F5;
-    color: #777;
-}
-
-h1 {
-    color: #333;
 }
