@@ -8,19 +8,23 @@ class InstallController extends Zend_Controller_Action {
     }
 
     public function indexAction() {
-        // action body
+        // Check to see if data folder is writeable
+        $writeablePath = realpath(getcwd() . '/../data');
+        $writeable = is_writable($writeablePath);
+
+        // Figure out what adaptors are available
         $adaptors = array(
-            'IBM DB2 and Informix Dynamic Server (IDS)' => 'pdo_ibm',
-            'MySQL' => 'pdo_mysql',
-            'MySQLi' => 'mysqli',
-            'Microsoft SQL Server' => 'pdo_mssql',
-            'Oracle' => 'pdo_oci',
-            'PostgreSQL' => 'pdo_pgsql',
-            'Sqlite' => 'pdo_sqlite'
+            'pdo_ibm' => 'IBM DB2 and Informix Dynamic Server (IDS)',
+            'pdo_mysql' => 'PDO MySQL',
+            'mysqli' => 'MySQLi',
+            'pdo_mssql' => 'Microsoft SQL Server',
+            'pdo_oci' => 'Oracle',
+            'pdo_pgsql' => 'PostgreSQL',
+            'pdo_sqlite' => 'Sqlite'
 
         );
         foreach($adaptors as $key => $adaptor) {
-            $db = Zend_Db::factory($adaptor, array(
+            $db = Zend_Db::factory($key, array(
                 'dbname' => 'test',
                 'password' => 'test',
                 'username' => 'test'
@@ -35,10 +39,16 @@ class InstallController extends Zend_Controller_Action {
         }
         $this->view->adaptors = $adaptors;
 
-
+        // Generate Form
         $form = new Default_Form_InstallStep1(array(
             'adaptors' => $adaptors
         ));
+
+        // Fill in form
+        $form->populate(array(
+            'writeable' => $writeable
+        ));
+
         $this->view->form = $form;
     }
 

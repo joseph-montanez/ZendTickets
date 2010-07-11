@@ -17,14 +17,9 @@ class Default_Form_InstallStep1 extends Zend_Dojo_Form
         // Set the method for the display form to POST
         $this->setMethod('post');
 
-        $this->setAttribs(array(
-            'name'   => 'toggletab',
-            'legend' => 'Basics',
-        ));
-
         // Add an email element
         $this->addElement('ComboBox', 'adaptorType', array(
-            'label'      => 'Adaptor Type',
+            'label'      => 'Type of Database',
             'required'   => true,
             'multiOptions' => $this->adaptors,
         ));
@@ -33,8 +28,7 @@ class Default_Form_InstallStep1 extends Zend_Dojo_Form
         $this->addElement('Checkbox', 'writeable', array(
             'label'      => 'Data Folder Writeable:',
             'required'   => true,
-            'disabled'   => true,
-            'checked'    => true
+            'disabled'   => true
         ));
 
 
