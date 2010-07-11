@@ -50,7 +50,7 @@ class TicketController extends Zend_Controller_Action
         // Send confirmation
         $smtp_config = array(
             'auth'     => 'login',
-            'username' => 'tickets@gorilla3d.com',
+            'username' => 'tickets@xxxxxx.com',
             'password' => 'xxxxx',
             'port'     => 587,
             'ssl'      => 'TLS'
@@ -59,7 +59,7 @@ class TicketController extends Zend_Controller_Action
             'host'     => 'pop.gmail.com',
             'port'     => 995,
             'ssl'      => 'SSL',
-            'user'     => 'tickets@gorilla3d.com',
+            'user'     => 'tickets@xxxxx.com',
             'password' => 'xxxxxx'
         );
         

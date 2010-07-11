@@ -8,6 +8,17 @@ CREATE TABLE product (
     created DATETIME NOT NULL
 );
 
+CREATE TABLE mail_accounts (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    smtpUsername VARCHAR(255) NULL,
+    smtpPassword VARCHAR(255) NULL,
+    smtpSSL VARCHAR(10) NULL,
+    smtpPort INTEGER NULL
+    subject VARCHAR(255) NULL,
+    message TEXT NULL,
+    receiveDate INTEGER NULL
+);
+
 CREATE TABLE tickets (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     fromEmail VARCHAR(255) NULL,
@@ -35,6 +46,7 @@ CREATE TABLE ticket_replies (
 );
 
 CREATE INDEX "product_id" ON "product" ("id");
+CREATE INDEX "mail_account_id" ON "mail_accounts" ("id");
 CREATE INDEX "ticket_id" ON "tickets" ("id");
 CREATE INDEX "ticket_reply_id" ON "ticket_replies" ("id");
 CREATE INDEX "ticket_attachment_id" ON "ticket_attachments" ("id");
