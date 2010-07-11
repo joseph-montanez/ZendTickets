@@ -18,8 +18,13 @@ root {
 body {
     background: #F5F5F5;
     color: #777;
+    font-family: Verdana,Arial,Helvetica,sans-serif;
 }
 
 h1 {
     color: #333;
+}
+
+#uiContrainer {
+    border: 1px solid #ccc;
 }

@@ -5,20 +5,31 @@ $this->dojo()->requireModule('dijit.layout.ContentPane');
 $this->dojo()->requireModule('dijit.layout.AccordionContainer');
 $this->dojo()->requireModule('dijit.form.Button');
 ?>
-<h1>ZendTickets Installer</h1>
-<div id="uiContainer" style="border: 1px solid #ccc">
-</div>
 <div id="disclaimer" style="display: none">
+    <h2>Step 1: Installation requirements</h2>
     <p>
         This is a highly experimental php application, so use at your own
         digression.
+    </p>
+    <p>
+        Supported Databases:<br />
+        <?php
+        $this->form->setAction($this->url());
+        echo $this->form;
+        ?>
+    </p>
+</div>
+<div id="leftSideNav" style="display: none">
+    <p>
+        <a href="">Step 1</a>
+        <a href="">Step 2</a>
     </p>
 </div>
 <script type="text/javascript">
     dojo.addOnLoad(function() {
         var outerBc = new dijit.layout.BorderContainer({
             "design": "sidebar",
-            "style": "height: 400px;"
+            "style": "height: 80%; min-height: 400px;"
         },
         "uiContainer");
 
@@ -28,31 +39,17 @@ $this->dojo()->requireModule('dijit.form.Button');
             "style": "width: 15%;",
             "splitter": "true",
             "id": "leftSidebar",
-            "content": "dfksfkjdh"
+            "content": dojo.byId("leftSideNav").innerHTML
         });
         outerBc.addChild(leftSidebar);
 
-        var rightContent = new dijit.layout.BorderContainer({
+        var rightContent = new dijit.layout.ContentPane({
             "id": "uiContent",
-            "region": "center"
-        });
-
-        var topContent = new dijit.layout.ContentPane({
             "region": "center",
-            "splitter": "true"
+            "content": dojo.byId("disclaimer").innerHTML
         });
-        rightContent.addChild(topContent);
-
-        var bottomContent = new dijit.layout.ContentPane({
-            "region": "bottom",
-            "style": "height: 100px;",
-            "splitter": "true"
-        });
-        rightContent.addChild(bottomContent);
 
         outerBc.addChild(rightContent);
-        //leftSidebar.startup();
-        //rightContent.startup();
         outerBc.startup();
 
     });

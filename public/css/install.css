@@ -1,0 +1,60 @@
+/* 
+    Document   : install
+    Created on : Jul 11, 2010, 4:41:22 AM
+    Author     : joseph
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+root { 
+    display: block;
+}
+
+body {
+    background: #F5F5F5;
+    color: #777;
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    height: 100%;
+}
+
+h1, h2, h3, h4, h5 {
+    color: #333;
+}
+
+h1 {
+    height: 10%;
+}
+
+#uiContrainer {
+    border: 1px solid #ccc;
+    height: 80%;
+}
+
+p {
+    margin-top: 0px;
+    margin-bottom: 20px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+#leftSidebar p a {
+    background: #E2E2E2 url(images/tabEnabled.png) repeat-x;
+    border: 1px solid #CCC;
+    display: block;
+    padding: 3px 5px;
+    margin-bottom: 5px;
+}
+
+#leftSidebar p a:hover {
+    color: #243C5F;
+    border-top-color:#92a0b3;
+    border-left-color:#92a0b3;
+    border-right-color:#92a0b3;
+    border-bottom-color:#92a0b3;
+    background:#e2e2e2 url(images/tabHover.gif) repeat-x;
+}
