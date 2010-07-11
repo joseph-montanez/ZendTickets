@@ -36,7 +36,9 @@ class InstallController extends Zend_Controller_Action {
         $this->view->adaptors = $adaptors;
 
 
-        $form = new Default_Form_InstallStep1();
+        $form = new Default_Form_InstallStep1(array(
+            'adaptors' => $adaptors
+        ));
         $this->view->form = $form;
     }
 

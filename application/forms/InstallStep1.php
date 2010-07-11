@@ -2,104 +2,48 @@
 
 class Default_Form_InstallStep1 extends Zend_Dojo_Form
 {
+    public $adaptors = array();
+    public function  __construct($options = null) {
+        if(isset($options['adaptors'])) {
+            $this->adaptors = (array) $options['adaptors'];
+        }
+        parent::__construct($options);
+    }
 
     public function init()
     {
         /* Form Elements & Other Definitions Here ... */
-        $this->setDecorators(array(
-            'FormElements',
-            array('TabContainer', array(
-                'id'          => 'tabContainer',
-                'style'       => 'width: 640px; height: 500px;',
-                'dijitParams' => array(
-                    'tabPosition' => 'top'
-                ),
-            )),
-            'DijitForm',
-        ));
+        Zend_Dojo::enableForm($this);
         // Set the method for the display form to POST
         $this->setMethod('post');
 
-        $basicForm = new Zend_Dojo_Form_SubForm();
-
-        $basicForm->setAttribs(array(
+        $this->setAttribs(array(
             'name'   => 'toggletab',
             'legend' => 'Basics',
         ));
 
         // Add an email element
-        $basicForm->addElement('TextBox', 'code', array(
-            'label'      => 'Product Code:',
+        $this->addElement('ComboBox', 'adaptorType', array(
+            'label'      => 'Adaptor Type',
             'required'   => true,
-            'filters'    => array('StringTrim'),
-            'validators' => array(
-                array('validator' => 'StringLength', 'options' => array(0, 32))
-            )
+            'multiOptions' => $this->adaptors,
         ));
 
         // Add an email element
-        $basicForm->addElement('DateTextBox', 'created', array(
-            'label'      => 'Created On:',
-            'required'   => false,
-            'filters'    => array('StringTrim')
-        ));
-
-        // Add an email element
-        $basicForm->addElement('TextBox', 'name', array(
-            'label'      => 'Product Name:',
+        $this->addElement('Checkbox', 'writeable', array(
+            'label'      => 'Data Folder Writeable:',
             'required'   => true,
-            'filters'    => array('StringTrim'),
-            'validators' => array(
-                array('validator' => 'StringLength', 'options' => array(0, 80))
-            )
-        ));
-
-        // Add the comment element
-        $basicForm->addElement('Textarea', 'description', array(
-            'label'      => 'Description:',
-            'required'   => true,
-            'validators' => array(
-                array('validator' => 'StringLength', 'options' => array(0, 200))
-            )
-        ));
-
-        // Add an email element
-        $basicForm->addElement('CurrencyTextBox', 'listPrice', array(
-            'label'      => 'Product List Price:',
-            'required'   => true,
-            'currency'   => 'USD',
-            'symbol'     => 'USD',
-            'type'       => 'currency',
-            'filters'    => array('StringTrim'),
-            'validators' => array(
-                array('validator' => 'Float')
-            )
-        ));
-
-        $xtraForm = new Zend_Dojo_Form_SubForm();
-
-        $xtraForm->setAttribs(array(
-            'name'   => 'toggle2',
-            'legend' => 'Extra',
-        ));
-
-        // Add an email element
-        $xtraForm->addElement('TextBox', 'nada', array(
-            'label'      => 'Foo Bar!:',
-            'required'   => false,
-            'filters'    => array('StringTrim')
+            'disabled'   => true,
+            'checked'    => true
         ));
 
 
         // Add the submit button
-        $basicForm->addElement('SubmitButton', 'submit', array(
+        $this->addElement('SubmitButton', 'saveChanges', array(
             'ignore'   => true,
-            'label'    => 'Save Product',
+            'label'    => 'Save Changes',
         ));
-
-        $this->addSubForm($basicForm, 'textboxtab');
-        $this->addSubForm($xtraForm, 'textboxtab2');
-
+        
         // And finally add some CSRF protection
         $this->addElement('hash', 'csrf', array(
             'ignore' => true,
