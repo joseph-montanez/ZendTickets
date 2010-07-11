@@ -1,0 +1,34 @@
+<?= $this->doctype() ?>
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head>  
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+  <title>Zend Framework Quickstart Application</title>
+  <?= $this->dojo() ?>
+  <?= $this->headLink()->appendStylesheet('/css/global.css') ?>
+  <?= $this->headScript() ?>
+</head> 
+<body class="tundra">
+<div id="header" style="background-color: #EEEEEE; height: 30px;">
+    <div id="header-logo" style="float: right">
+        <b>ZF Quickstart Application</b>
+    </div>
+    <div id="header-navigation" style="float: left">
+        <a href="<?= $this->url(
+            array('controller'=>'product'), 
+            'default', 
+            true) ?>">Product Listing</a>
+        <a href="<?= $this->url(
+            array('controller'=>'ticket', 'action'=>'list'), 
+            'default', 
+            true) ?>">Ticket Listing</a>
+        <a href="<?= $this->url(
+            array('controller'=>'ticket', 'action'=>'index'), 
+            'default', 
+            true) ?>">Check for Tickets</a>
+    </div>
+</div>
+
+<?php echo $this->layout()->content ?>
+
+</body>
+</html>

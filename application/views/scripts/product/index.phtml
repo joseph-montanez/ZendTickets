@@ -1,0 +1,22 @@
+<p><a href="<?= $this->url(
+    array(
+        'controller' => 'product',
+        'action'     => 'create'
+    ), 
+    'default', 
+    true) ?>">Add a product</a></p>
+
+Guestbook Entries: <br />
+<dl>
+    <? foreach ($this->items as $item): ?>
+    <dt><a href="<?= $this->url(
+        array(
+            'controller' => 'product',
+            'action'     => 'update',
+            'id'         => $item->id
+        ), 
+        'default', 
+        true) ?>"><?= $this->escape($item->name) ?></a></dt>
+    <dd><?= $this->escape($item->description) ?></dd>
+    <? endforeach ?>
+</dl>

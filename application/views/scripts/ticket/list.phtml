@@ -1,0 +1,111 @@
+<?php foreach ($this->tickets as $ticket): ?>
+    <div style="
+        padding: 5px;
+        background-color: rgb(250, 250, 250);
+        border-bottom: 1px solid rgb(204, 204, 204);
+        height: 25px;
+        margin: 0px;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        position: relative;
+        width: 740px;
+        zoom: 1;
+    ">
+        <div style="
+            color: rgb(85, 85, 85);
+            display: block;
+            font-size: 13px;
+            height: 15px;
+            white-space: nowrap;
+            width: 100px;
+            float: left;
+        ">
+        Ticket #<?= $ticket->id ?> 
+        </div>
+        <div style="
+            float: left;
+            color: rgb(119, 119, 119);
+            display: block;
+            height: 16px;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            padding: 0px;
+            white-space: normal;
+            width: 600px;
+        ">
+        <h2 style="
+            color: black;
+            display: inline;
+            font-size: 13px;
+            font-weight: bold;
+            height: 0px;
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 1px;
+            width: 600px;
+            float: left;
+        ">
+            <?= $ticket->subject ?> 
+            <span style="color: rgb(119, 119, 119); font-weight: normal;"> - 
+                [<?= count($ticket->attachments) ?> files]
+                [<?= count($ticket->replies) ?> replies]
+            </span>
+        </h2>
+        <div style="
+            padding-top: 15px;
+            font-size: 13px;
+        ">
+            <?= count($ticket->replies) ?> Replies
+        </div>
+        </div>
+        <!--
+    <br />
+    Message: <br /><?= $ticket->message ?><br />
+    </blockquote>
+    Actions: <a href="<?= $this->url(
+            array(
+                'controller'=>'ticket', 
+                'action' => 'delete',
+                'id' => $ticket->id
+            ), 
+            'default', 
+            true) ?>">Delete Ticket</a>
+    <ul>
+    <h3>Attachments</h3>
+    <?php foreach ($ticket->attachments as $attachment): ?>
+        <li><a href="<?= $this->url(
+            array(
+                'controller'=>'ticket', 
+                'action' => 'attachment',
+                'id' => $attachment->id
+            ), 
+            'default', 
+            true) ?>"><?= $attachment->filename ?> - attachment</a></li>
+    <?php endforeach ?>
+    <h3>Replies</h3>
+    <?php foreach ($ticket->replies as $reply): ?>
+        <li><a href="<?= $this->url(
+            array(
+                'controller'=>'ticket', 
+                'action' => 'reply',
+                'id' => $reply->id
+            ), 
+            'default', 
+            true) ?>"><?= $reply->subject ?></a><br />
+            <div>
+                <?= $reply->message ?>
+            </div>
+        </li>
+    <?php endforeach ?>
+    </ul>
+    <hr />
+    -->
+    </div>
+<?php endforeach ?>
