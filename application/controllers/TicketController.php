@@ -83,7 +83,7 @@ class TicketController extends Zend_Controller_Action
                 // Send a plain text email
                 $sendmail = new Zend_Mail();
                 $sendmail->setBodyText('Thank you for your submission. We will process you ticket shortly.');
-                $sendmail->setFrom('tickets@gorilla3d.com', 'Gorilla3D Tickets');
+                $sendmail->setFrom('tickets@xxxxxx.com', 'Zend Tickets');
                 $sendmail->addTo($message['message']['fromEmail']);
                 $sendmail->setSubject('Ticket #' . $ticketId);
                 $sendmail->send($transport);
