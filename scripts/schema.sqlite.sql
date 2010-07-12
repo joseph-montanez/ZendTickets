@@ -12,7 +12,7 @@ CREATE TABLE mailAccounts (
     smtpUsername VARCHAR(255) NULL,
     smtpPassword VARCHAR(255) NULL,
     smtpSSL VARCHAR(10) NULL,
-    smtpPort INTEGER NULL
+    smtpPort INTEGER NULL,
     subject VARCHAR(255) NULL,
     message TEXT NULL,
     receiveDate INTEGER NULL

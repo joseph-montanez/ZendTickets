@@ -25,17 +25,16 @@ class ZendTickets_Validate_WritableFolder extends Zend_Validate_Abstract
 
     public function isValid($value, $context = null)
     {
-        $path = realpath(getcwd() . '/../' . $this->_folder);
+        $path = realpath(getcwd() . '/' . $this->_folder);
         $writable = is_writable($path);
 
+        $this->_setValue((string) $value);
+
         if(!$writable) {
-            $this->_setValue("0");
             $this->_error(self::NOT_WRITABLE);
             return false;
         }
         
-        $this->_setValue("1");
-
         return true;
     }
 }

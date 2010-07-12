@@ -54,15 +54,30 @@ class InstallController extends Zend_Controller_Action
                 //));
         
                 if ($request->isPost() && $form->isValid($request->getPost())) {
+                    // Init directories
+                    $path = realpath(getcwd() . '/data');
+                    $dbPath = $path . '/db';
+                    $logPath = $path . '/log';
+                    mkdir($dbPath);
+                    mkdir($logPath);
+                    chmod($dbPath, 0777);
+                    chmod($logPath, 0777);
+
                     $schemaFile = false;
                     $adaptorType = $request->getParam('adaptorType');
                     if(stristr($adaptorType, 'sqlite')) {
                         $schemaFile = 'schema.sqlite.sql';
                     }
                     if($schemaFile !== false) {
+                        $schemaFile = realpath(getcwd() . '/../scripts/' . $schemaFile);
+                        $dbFile = $dbPath . '/tickets.db';
+                        if(is_file($dbFile) and is_writable($dbFile)) {
+                            unlink($dbFile);
+                        }
                         $dbAdapter = Zend_Db::factory($adaptorType, array(
-                            'dbname' => realpath(getcwd() . '/../data/db/tickets.db'),
+                            'dbname' => $dbFile,
                         ));
+                        $schemaSql = file_get_contents($schemaFile);
                         $dbAdapter->getConnection()->exec($schemaSql);
                     }
                     return $this->_helper->redirector('step-two');
