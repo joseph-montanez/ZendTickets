@@ -50,7 +50,7 @@ p {
     margin-bottom: 5px;
 }
 
-#leftSidebar p a:hover {
+#leftSidebar p a:hover, #leftSidebar p a.active {
     color: #243C5F;
     border-top-color:#92a0b3;
     border-left-color:#92a0b3;

@@ -8,6 +8,10 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             'namespace' => 'Default_',
             'basePath'  => dirname(__FILE__),
         ));
+
+        $loader = Zend_Loader_Autoloader::getInstance();
+        $loader->registerNamespace('ZendTickets_');
+
         return $autoloader;
     }
 

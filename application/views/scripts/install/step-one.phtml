@@ -1,0 +1,35 @@
+<?php
+$this->dojo()->enable();
+$this->dojo()->requireModule('dijit.layout.BorderContainer');
+$this->dojo()->requireModule('dijit.layout.ContentPane');
+$this->dojo()->requireModule('dijit.layout.AccordionContainer');
+$this->dojo()->requireModule('dijit.form.Button');
+?>
+<?php $this->borderContainer()->captureStart('masterLayout', array('design' => 'headline','persist' => true), array('style' => 'width: 100%; height: 500px;')) ?>
+
+<!-- Left Sidebar -->
+<?php $this->contentPane()->captureStart('leftSidebar', array('region' => 'leading', 'style' => 'width: 15%', 'splitter' => true)) ?>
+<p>
+    <?php foreach($this->navigation as $page) { ?>
+        <?php echo $page ?>
+    <?php } ?>
+</p>
+<?php echo $this->contentPane()->captureEnd('leftSidebar') ?>
+
+<!-- Main -->
+<?php $this->contentPane()->captureStart('main', array('region' => 'center')) ?>
+<h2>Step 1: Installation requirements</h2>
+<p>
+    This is a highly experimental php application, so use at your own
+    digression.
+</p>
+<p>
+    Supported Databases:<br />
+</p>
+<?php
+$this->form->setAction($this->url());
+echo $this->form;
+?>
+<?php echo $this->contentPane()->captureEnd('main') ?>
+
+<?php echo $this->borderContainer()->captureEnd('masterLayout') ?>

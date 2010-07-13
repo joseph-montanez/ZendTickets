@@ -15,6 +15,7 @@
         <controllerFile controllerName="Install">
           <actionMethod actionName="index"/>
           <actionMethod actionName="stepTwo"/>
+          <actionMethod actionName="stepOne"/>
         </controllerFile>
       </controllersDirectory>
       <formsDirectory enabled="false">
@@ -36,6 +37,9 @@
           </viewControllerScriptsDirectory>
           <viewControllerScriptsDirectory forControllerName="Install">
             <viewScriptFile forActionName="stepTwo"/>
+          </viewControllerScriptsDirectory>
+          <viewControllerScriptsDirectory forControllerName="Install">
+            <viewScriptFile forActionName="stepOne"/>
           </viewControllerScriptsDirectory>
         </viewScriptsDirectory>
         <viewHelpersDirectory/>
