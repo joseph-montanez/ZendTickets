@@ -17,7 +17,12 @@ class Default_Form_InstallStep1 extends Zend_Dojo_Form {
         // Set the method for the display form to POST
         $this->setMethod('post');
 
-        // Add an email element
+        // Really? I really have to do?
+        $front = Zend_Controller_Front::getInstance();
+        $request = $front->getRequest();
+        $adaptorType = $request->get('adaptorType');
+        $isRequired = $adaptorType !== 'pdo_sqlite';
+
         $this->addElement('FilteringSelect', 'adaptorType', array(
             'label' => 'Type of Database',
             'required' => true,
@@ -25,7 +30,27 @@ class Default_Form_InstallStep1 extends Zend_Dojo_Form {
             'multiOptions' => $this->adaptors
         ));
 
-        // Add an email element
+        $this->addElement('TextBox', 'server', array(
+            'label' => 'Location of Database',
+            'required' => $isRequired,
+            'value' => 'localhost'
+        ));
+
+        $this->addElement('TextBox', 'username', array(
+            'label' => 'Username of Database',
+            'required' => $isRequired
+        ));
+
+        $this->addElement('PasswordTextBox', 'password', array(
+            'label' => 'Password of Username',
+            'required' => $isRequired
+        ));
+
+        $this->addElement('TextBox', 'dbname', array(
+            'label' => 'Name of Database',
+            'required' => $isRequired
+        ));
+
         $this->addElement('Checkbox', 'writable', array(
             'label' => '"/data" Folder Writable:',
             'required' => true,

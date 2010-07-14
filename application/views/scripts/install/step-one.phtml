@@ -26,10 +26,19 @@ $this->dojo()->requireModule('dijit.form.Button');
 <p>
     Supported Databases:<br />
 </p>
-<?php
-$this->form->setAction($this->url());
-echo $this->form;
-?>
+<?php echo $this->form ?>
 <?php echo $this->contentPane()->captureEnd('main') ?>
 
 <?php echo $this->borderContainer()->captureEnd('masterLayout') ?>
+
+<script type="text/javascript">
+// This is just a weird way to register captures... why do I need to put a
+// functions around it!?
+<?php $this->dojo()->onLoadCaptureStart() ?>
+    function () {
+        dojo.connect(dijit.byId('adaptorType'), 'onChange', function () {
+            alert('I have been changed!');
+        });
+    }
+<?php $this->dojo()->onLoadCaptureEnd() ?>
+</script>
