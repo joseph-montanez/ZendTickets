@@ -37,7 +37,18 @@ $this->dojo()->requireModule('dijit.form.Button');
 <?php $this->dojo()->onLoadCaptureStart() ?>
     function () {
         dojo.connect(dijit.byId('adaptorType'), 'onChange', function () {
-            alert('I have been changed!');
+            var elems = ['dbServer', 'dbUsername', 'dbPassword', 'dbName'];
+            var value = this.value;
+            dojo.forEach(elems, function (ele, i) {
+                console.log(value);
+                if(value === 'pdo_sqlite') {
+                    dojo.byId(ele + '-label').style.display = "none";
+                    dijit.byId(ele).domNode.style.display = "none";
+                } else {
+                    dojo.byId(ele + '-label').style.display = "block";
+                    dijit.byId(ele).domNode.style.display = "block";
+                }
+            });
         });
     }
 <?php $this->dojo()->onLoadCaptureEnd() ?>

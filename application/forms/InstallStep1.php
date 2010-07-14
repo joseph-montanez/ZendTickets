@@ -30,23 +30,23 @@ class Default_Form_InstallStep1 extends Zend_Dojo_Form {
             'multiOptions' => $this->adaptors
         ));
 
-        $this->addElement('TextBox', 'server', array(
+        $this->addElement('TextBox', 'dbServer', array(
             'label' => 'Location of Database',
             'required' => $isRequired,
             'value' => 'localhost'
         ));
 
-        $this->addElement('TextBox', 'username', array(
+        $this->addElement('TextBox', 'dbUsername', array(
             'label' => 'Username of Database',
             'required' => $isRequired
         ));
 
-        $this->addElement('PasswordTextBox', 'password', array(
+        $this->addElement('PasswordTextBox', 'dbPassword', array(
             'label' => 'Password of Username',
             'required' => $isRequired
         ));
 
-        $this->addElement('TextBox', 'dbname', array(
+        $this->addElement('TextBox', 'dbName', array(
             'label' => 'Name of Database',
             'required' => $isRequired
         ));
