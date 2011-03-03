@@ -4,6 +4,23 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
     protected function _initAutoload()
     {
+        $options = $this->getOptions();
+        $log = $options['resources']['log']['stream']['writerParams']['stream'];
+        $logFolder = dirname(realpath($log));
+        $dataFolder = realpath($logFolder . '/../');
+        
+        if(is_writable($dataFolder) && !is_dir($logFolder)) {
+            mkdir($logFolder);
+        }
+        
+        if(!is_writable($logFolder)) {
+            chmod($logFolder, 0777);
+        }
+        
+        if(!is_writable($logFolder)) {
+            die('Please make this writable: ' . $dataFolder);
+        }
+        
         $autoloader = new Zend_Application_Module_Autoloader(array(
             'namespace' => 'Default_',
             'basePath'  => dirname(__FILE__),
