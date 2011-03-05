@@ -14,7 +14,7 @@
  *
  * @category   Zend
  * @package    Zend_Form
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -23,9 +23,9 @@
  *
  * @category   Zend
  * @package    Zend_Form
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: DisplayGroup.php 22465 2010-06-19 17:41:03Z alab $
+ * @version    $Id: DisplayGroup.php 23775 2011-03-01 17:25:24Z ralph $
  */
 class Zend_Form_DisplayGroup implements Iterator,Countable
 {
@@ -64,6 +64,13 @@ class Zend_Form_DisplayGroup implements Iterator,Countable
      * @var array
      */
     protected $_elements = array();
+
+    /**
+     * Form object to which the display group is currently registered
+     *
+     * @var Zend_Form
+     */
+    protected $_form;
 
     /**
      * Whether or not a new element has been added to the group
@@ -276,6 +283,35 @@ class Zend_Form_DisplayGroup implements Iterator,Countable
     }
 
     /**
+     * Set form object to which the display group is attached
+     *
+     * @param  Zend_Form $form
+     * @return Zend_Form_DisplayGroup
+     */
+    public function setForm(Zend_Form $form)
+    {
+        $this->_form = $form;
+
+        // Ensure any elements attached prior to setting the form are now
+        // removed from iteration by the form
+        foreach ($this->getElements() as $element) {
+            $form->removeFromIteration($element->getName());
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get form object to which the group is attached
+     *
+     * @return Zend_Form|null
+     */
+    public function getForm()
+    {
+        return $this->_form;
+    }
+
+    /**
      * Filter a name to only allow valid variable characters
      *
      * @param  string $value
@@ -432,6 +468,12 @@ class Zend_Form_DisplayGroup implements Iterator,Countable
     {
         $this->_elements[$element->getName()] = $element;
         $this->_groupUpdated = true;
+
+        // Display group will now handle display of element
+        if (null !== ($form = $this->getForm())) {
+            $form->removeFromIteration($element->getName());
+        }
+
         return $this;
     }
 

@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Document
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Html.php 21946 2010-04-19 08:21:02Z alexander $
+ * @version    $Id: Html.php 23775 2011-03-01 17:25:24Z ralph $
  */
 
 
@@ -31,7 +31,7 @@ require_once 'Zend/Search/Lucene/Document.php';
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Document
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Search_Lucene_Document_Html extends Zend_Search_Lucene_Document
@@ -102,7 +102,7 @@ class Zend_Search_Lucene_Document_Html extends Zend_Search_Lucene_Document
             // Document encoding is not recognized
 
             /** @todo improve HTML vs HTML fragment recognition */
-            if (preg_match('/<html>/i', $htmlData, $matches, PREG_OFFSET_CAPTURE)) {
+            if (preg_match('/<html[^>]*>/i', $htmlData, $matches, PREG_OFFSET_CAPTURE)) {
                 // It's an HTML document
                 // Add additional HEAD section and recognize document
                 $htmlTagOffset = $matches[0][1] + strlen($matches[0][0]);

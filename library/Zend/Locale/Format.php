@@ -15,8 +15,8 @@
  * @category   Zend
  * @package    Zend_Locale
  * @subpackage Format
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Format.php 21493 2010-03-14 12:01:43Z thomas $
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
+ * @version    $Id: Format.php 23775 2011-03-01 17:25:24Z ralph $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -29,7 +29,7 @@ require_once 'Zend/Locale/Data.php';
  * @category   Zend
  * @package    Zend_Locale
  * @subpackage Format
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Locale_Format
@@ -193,6 +193,10 @@ class Zend_Locale_Format
      */
     public static function convertNumerals($input, $from, $to = null)
     {
+        if (!self::_getUniCodeSupport()) {
+            trigger_error("Sorry, your PCRE extension does not support UTF8 which is needed for the I18N core", E_USER_NOTICE);
+        }
+
         $from   = strtolower($from);
         $source = Zend_Locale_Data::getContent('en', 'numberingsystem', $from);
         if (empty($source)) {
@@ -497,6 +501,10 @@ class Zend_Locale_Format
      */
     public static function isNumber($input, array $options = array())
     {
+        if (!self::_getUniCodeSupport()) {
+            trigger_error("Sorry, your PCRE extension does not support UTF8 which is needed for the I18N core", E_USER_NOTICE);
+        }
+
         $options = self::_checkOptions($options) + self::$_options;
 
         // Get correct signs for this locale
@@ -757,6 +765,10 @@ class Zend_Locale_Format
      */
     private static function _parseDate($date, $options)
     {
+        if (!self::_getUniCodeSupport()) {
+            trigger_error("Sorry, your PCRE extension does not support UTF8 which is needed for the I18N core", E_USER_NOTICE);
+        }
+
         $options = self::_checkOptions($options) + self::$_options;
         $test = array('h', 'H', 'm', 's', 'y', 'Y', 'M', 'd', 'D', 'E', 'S', 'l', 'B', 'I',
                        'X', 'r', 'U', 'G', 'w', 'e', 'a', 'A', 'Z', 'z', 'v');
@@ -1130,36 +1142,37 @@ class Zend_Locale_Format
         $options = self::_checkOptions($options) + self::$_options;
 
         // day expected but not parsed
-        if ((iconv_strpos($options['date_format'], 'd', 0, 'UTF-8') !== false) and (!isset($date['day']) or ($date['day'] == ""))) {
+        if ((iconv_strpos($options['date_format'], 'd', 0, 'UTF-8') !== false) and (!isset($date['day']) or ($date['day'] === ""))) {
             return false;
         }
 
         // month expected but not parsed
-        if ((iconv_strpos($options['date_format'], 'M', 0, 'UTF-8') !== false) and (!isset($date['month']) or ($date['month'] == ""))) {
+        if ((iconv_strpos($options['date_format'], 'M', 0, 'UTF-8') !== false) and (!isset($date['month']) or ($date['month'] === ""))) {
             return false;
         }
 
         // year expected but not parsed
         if (((iconv_strpos($options['date_format'], 'Y', 0, 'UTF-8') !== false) or
-             (iconv_strpos($options['date_format'], 'y', 0, 'UTF-8') !== false)) and (!isset($date['year']) or ($date['year'] == ""))) {
+             (iconv_strpos($options['date_format'], 'y', 0, 'UTF-8') !== false)) and (!isset($date['year']) or ($date['year'] === ""))) {
             return false;
         }
 
         // second expected but not parsed
-        if ((iconv_strpos($options['date_format'], 's', 0, 'UTF-8') !== false) and (!isset($date['second']) or ($date['second'] == ""))) {
+        if ((iconv_strpos($options['date_format'], 's', 0, 'UTF-8') !== false) and (!isset($date['second']) or ($date['second'] === ""))) {
             return false;
         }
 
         // minute expected but not parsed
-        if ((iconv_strpos($options['date_format'], 'm', 0, 'UTF-8') !== false) and (!isset($date['minute']) or ($date['minute'] == ""))) {
+        if ((iconv_strpos($options['date_format'], 'm', 0, 'UTF-8') !== false) and (!isset($date['minute']) or ($date['minute'] === ""))) {
             return false;
         }
 
         // hour expected but not parsed
         if (((iconv_strpos($options['date_format'], 'H', 0, 'UTF-8') !== false) or
-             (iconv_strpos($options['date_format'], 'h', 0, 'UTF-8') !== false)) and (!isset($date['hour']) or ($date['hour'] == ""))) {
+             (iconv_strpos($options['date_format'], 'h', 0, 'UTF-8') !== false)) and (!isset($date['hour']) or ($date['hour'] === ""))) {
             return false;
         }
+
         return true;
     }
 
@@ -1237,5 +1250,16 @@ class Zend_Locale_Format
             $options['date_format'] = self::getDateTimeFormat($options['locale']);
         }
         return self::_parseDate($datetime, $options);
+    }
+
+    /**
+     * Internal method to detect of Unicode supports UTF8
+     * which should be enabled within vanilla php installations
+     *
+     * @return boolean
+     */
+    protected static function _getUniCodeSupport()
+    {
+        return (@preg_match('/\pL/u', 'a')) ? true : false;
     }
 }

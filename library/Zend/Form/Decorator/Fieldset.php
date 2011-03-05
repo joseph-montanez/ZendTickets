@@ -15,7 +15,7 @@
  * @category   Zend
  * @package    Zend_Form
  * @subpackage Decorator
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -30,9 +30,9 @@ require_once 'Zend/Form/Decorator/Abstract.php';
  * @category   Zend
  * @package    Zend_Form
  * @subpackage Decorator
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Fieldset.php 21967 2010-04-21 23:22:00Z alab $
+ * @version    $Id: Fieldset.php 23775 2011-03-01 17:25:24Z ralph $
  */
 class Zend_Form_Decorator_Fieldset extends Zend_Form_Decorator_Abstract
 {
@@ -72,7 +72,7 @@ class Zend_Form_Decorator_Fieldset extends Zend_Form_Decorator_Abstract
         $options = parent::getOptions();
         if (null !== ($element = $this->getElement())) {
             $attribs = $element->getAttribs();
-            $options = array_merge($options, $attribs);
+            $options = array_merge($attribs, $options);
             $this->setOptions($options);
         }
         return $options;

@@ -1,1 +1,55 @@
-<br /><br /><center>View script for controller <b>Install</b> and script/action name <b>stepTwo</b></center>
+<?php
+$this->dojo()->enable();
+$this->dojo()->requireModule('dijit.layout.BorderContainer');
+$this->dojo()->requireModule('dijit.layout.ContentPane');
+$this->dojo()->requireModule('dijit.layout.AccordionContainer');
+$this->dojo()->requireModule('dijit.form.Button');
+?>
+<?php $this->borderContainer()->captureStart('masterLayout', array('design' => 'headline','persist' => true), array('style' => 'width: 100%; height: 500px;')) ?>
+
+<!-- Left Sidebar -->
+<?php $this->contentPane()->captureStart('leftSidebar', array('region' => 'leading', 'style' => 'width: 15%', 'splitter' => true)) ?>
+<p>
+    <?php foreach($this->navigation as $page) { ?>
+        <?php echo $page ?>
+    <?php } ?>
+</p>
+<?php echo $this->contentPane()->captureEnd('leftSidebar') ?>
+
+<!-- Main -->
+<?php $this->contentPane()->captureStart('main', array('region' => 'center')) ?>
+<h2>Step 2: Eat Cake</h2>
+<p>
+    This is a highly experimental php application, so use at your own
+    digression.
+</p>
+<button id="useApp" dojoType="dijit.form.Button">Use Application</button>
+<?php echo $this->contentPane()->captureEnd('main') ?>
+
+<?php echo $this->borderContainer()->captureEnd('masterLayout') ?>
+
+<script type="text/javascript">
+// This is just a weird way to register captures... why do I need to put a
+// function around it!?
+<?php $this->dojo()->onLoadCaptureStart() ?>
+    function () {
+        dojo.connect(dijit.byId('adaptorType'), 'onChange', function () {
+            var elems = ['dbServer', 'dbUsername', 'dbPassword', 'dbName'];
+            var value = this.value;
+            dojo.forEach(elems, function (ele, i) {
+                console.log(value);
+                if(value === 'pdo_sqlite') {
+                    dojo.byId(ele + '-label').style.display = "none";
+                    dijit.byId(ele).domNode.style.display = "none";
+                } else {
+                    dojo.byId(ele + '-label').style.display = "block";
+                    dijit.byId(ele).domNode.style.display = "block";
+                }
+            });
+        });
+        dojo.connect(dijit.byId('useApp'), 'onClick', function () {
+            document.location.href = '<?php echo $this->baseUrl('ticket/list'); ?>';
+        })
+    }
+<?php $this->dojo()->onLoadCaptureEnd() ?>
+</script>

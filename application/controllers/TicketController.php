@@ -47,23 +47,12 @@ class TicketController extends Zend_Controller_Action
 
     public function indexAction()
     {
-        // Send confirmation
-        $smtp_config = array(
-            'auth'     => 'login',
-            'username' => 'tickets@xxxxxx.com',
-            'password' => 'xxxxx',
-            'port'     => 587,
-            'ssl'      => 'TLS'
-        );
-        $pop3_config = array(
-            'host'     => 'pop.gmail.com',
-            'port'     => 995,
-            'ssl'      => 'SSL',
-            'user'     => 'tickets@xxxxx.com',
-            'password' => 'xxxxxx'
-        );
-        
-        $mail = new Zend_Mail_Storage_Pop3($pop3_config);
+        $bootstrap = $this->getInvokeArg('bootstrap');
+        $options = $bootstrap->getOptions();
+        $smtp_config = $options['smtp'];
+        $pop3_config = $options['pop3'];
+
+        $mail = new Zend_Mail_Storage_Pop3($pop3_config['config']);
 
         echo $mail->countMessages() . " messages found\n";
         foreach ($mail as $i => $message) {
@@ -77,13 +66,12 @@ class TicketController extends Zend_Controller_Action
                 $ticketId = $ticketModel->getMapper()->getDbTable()->getAdapter()->lastInsertId();
                 
                 $replyId = 0;
-                
 
-                $transport = new Zend_Mail_Transport_Smtp('smtp.gmail.com', $smtp_config);
+                $transport = new Zend_Mail_Transport_Smtp($smtp_config['host'], $smtp_config['config']);
                 // Send a plain text email
                 $sendmail = new Zend_Mail();
                 $sendmail->setBodyText('Thank you for your submission. We will process you ticket shortly.');
-                $sendmail->setFrom('tickets@xxxxxx.com', 'Zend Tickets');
+                $sendmail->setFrom($smtp_config['email']['address'], $smtp_config['email']['name']);
                 $sendmail->addTo($message['message']['fromEmail']);
                 $sendmail->setSubject('Ticket #' . $ticketId);
                 $sendmail->send($transport);
@@ -205,16 +193,11 @@ class TicketController extends Zend_Controller_Action
                     $attachment['contentType'] = $part->contentType;
                     
                     // Grab the filename
-                    /*
-                    preg_match('/name=\"(?<filename>[^\"]+)/', $part->contentType, $matches);
-                    if ($matches !== false and isset($matches['filename'])) {
-                        $attachment['filename'] = $matches['filename'];
-                    }
-                    */
                     $attachment['filename'] = $part->getHeaderField('content-type', 'name');
                     
                     // Decode attachment's data
                     $content = (string) $part;
+                    // TODO: Need to part before assuming it has a transfer encoding
                     if ($part->contentTransferEncoding === 'base64') {
                         $content = base64_decode($content);
                     }

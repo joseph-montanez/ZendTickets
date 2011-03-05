@@ -15,8 +15,8 @@
  * @category   Zend
  * @package    Zend_Loader
  * @subpackage Autoloader
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Autoloader.php 22480 2010-06-21 17:37:20Z matthew $
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
+ * @version    $Id: Autoloader.php 23775 2011-03-01 17:25:24Z ralph $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -29,7 +29,7 @@ require_once 'Zend/Loader.php';
  * @uses       Zend_Loader_Autoloader
  * @package    Zend_Loader
  * @subpackage Autoloader
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Loader_Autoloader
@@ -560,7 +560,7 @@ class Zend_Loader_Autoloader
         $versionLen = strlen($version);
         $versions   = array();
         $dirs       = glob("$path/*", GLOB_ONLYDIR);
-        foreach ($dirs as $dir) {
+        foreach ((array) $dirs as $dir) {
             $dirName = substr($dir, strlen($path) + 1);
             if (!preg_match('/^(?:ZendFramework-)?(\d+\.\d+\.\d+((a|b|pl|pr|p|rc)\d+)?)(?:-minimal)?$/i', $dirName, $matches)) {
                 continue;

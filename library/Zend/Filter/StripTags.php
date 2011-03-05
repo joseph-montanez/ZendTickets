@@ -14,9 +14,9 @@
  *
  * @category   Zend
  * @package    Zend_Filter
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: StripTags.php 22174 2010-05-14 22:12:50Z thomas $
+ * @version    $Id: StripTags.php 23775 2011-03-01 17:25:24Z ralph $
  */
 
 
@@ -29,7 +29,7 @@ require_once 'Zend/Filter/Interface.php';
 /**
  * @category   Zend
  * @package    Zend_Filter
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Filter_StripTags implements Zend_Filter_Interface
@@ -244,7 +244,14 @@ class Zend_Filter_StripTags implements Zend_Filter_Interface
             $pos   = strrpos($value, '<!--');
             $start = substr($value, 0, $pos);
             $value = substr($value, $pos);
-            $value = preg_replace('/<(?:!(?:--[\s\S]*?--\s*)?(>))/us', '',  $value);
+
+            // If there is no comment closing tag, strip whole text
+            if (!preg_match('/--\s*>/s', $value)) {
+                $value = '';
+            } else {
+                $value = preg_replace('/<(?:!(?:--[\s\S]*?--\s*)?(>))/s', '',  $value);
+            }
+
             $value = $start . $value;
         }
 

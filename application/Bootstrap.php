@@ -5,6 +5,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     protected function _initAutoload()
     {
         $options = $this->getOptions();
+        // TODO: This should probably be someone else...
         $log = $options['resources']['log']['stream']['writerParams']['stream'];
         $logFolder = dirname(realpath($log));
         $dataFolder = realpath($logFolder . '/../');
@@ -13,11 +14,16 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             mkdir($logFolder);
         }
         
-        if(!is_writable($logFolder)) {
-            chmod($logFolder, 0777);
+        $logFolderIsWritable = is_writable($logFolder);
+        $isSameUser = posix_getuid() === getmyuid();
+        if(!$logFolderIsWritable && is_readable($logFolder) && $isSameUser) {
+            // TODO: this needs to be the UID of the logFolder, not php process
+            if(posix_getuid() === getmyuid()) {
+                chmod($logFolder, 0777);
+            }
         }
         
-        if(!is_writable($logFolder)) {
+        if(!$logFolderIsWritable) {
             die('Please make this writable: ' . $dataFolder);
         }
         
@@ -30,6 +36,11 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $loader->registerNamespace('ZendTickets_');
 
         return $autoloader;
+    }  
+    
+    protected function _initConfig() {
+        $config = new Zend_Config_Ini("../application/configs/application.ini");
+        Zend_Registry::set('config', $config);
     }
 
     protected function _initDojo()

@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Tool
  * @subpackage Framework
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: BootstrapFile.php 19643 2009-12-14 14:57:07Z ralph $
+ * @version    $Id: AbstractClassFile.php 23775 2011-03-01 17:25:24Z ralph $
  */
 
 /**
@@ -28,17 +28,17 @@
  *
  * @category   Zend
  * @package    Zend_Tool
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Tool_Project_Context_Zf_AbstractClassFile extends Zend_Tool_Project_Context_Filesystem_File
 {
-    
+
     /**
      * getFullClassName()
-     * 
-     * @param $localClassName
-     * @param $classContextName
+     *
+     * @param string $localClassName
+     * @param string $classContextName
      */
     public function getFullClassName($localClassName, $classContextName = null)
     {
@@ -53,7 +53,7 @@ abstract class Zend_Tool_Project_Context_Zf_AbstractClassFile extends Zend_Tool_
             }
         } while ($currentResource instanceof Zend_Tool_Project_Profile_Resource
             && $currentResource = $currentResource->getParentResource());
-        
+
         $fullClassName = '';
 
         // go find the proper prefix
@@ -62,8 +62,8 @@ abstract class Zend_Tool_Project_Context_Zf_AbstractClassFile extends Zend_Tool_
                 $prefix = $containingResource->getAttribute('classNamePrefix');
                 $fullClassName = $prefix;
             } elseif ($containingResource->getName() == 'ModuleDirectory') {
-                $prefix = $containingResource->getAttribute('moduleName') . '_';
-                $fullClassName = $prefix;    
+                $prefix = ucfirst($containingResource->getAttribute('moduleName')) . '_';
+                $fullClassName = $prefix;
             }
         }
 

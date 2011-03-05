@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Cache
  * @subpackage Zend_Cache_Backend
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: TwoLevels.php 21954 2010-04-19 19:19:24Z mabe $
+ * @version    $Id: TwoLevels.php 23775 2011-03-01 17:25:24Z ralph $
  */
 
 
@@ -35,7 +35,7 @@ require_once 'Zend/Cache/Backend.php';
 /**
  * @package    Zend_Cache
  * @subpackage Zend_Cache_Backend
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -93,14 +93,14 @@ class Zend_Cache_Backend_TwoLevels extends Zend_Cache_Backend implements Zend_Ca
     /**
      * Slow Backend
      *
-     * @var Zend_Cache_Backend
+     * @var Zend_Cache_Backend_ExtendedInterface
      */
     protected $_slowBackend;
 
     /**
      * Fast Backend
      *
-     * @var Zend_Cache_Backend
+     * @var Zend_Cache_Backend_ExtendedInterface
      */
     protected $_fastBackend;
 
@@ -201,6 +201,11 @@ class Zend_Cache_Backend_TwoLevels extends Zend_Cache_Backend implements Zend_Ca
             $boolSlow = $this->_slowBackend->save($preparedData, $id, $tags, $lifetime);
             if ($boolSlow === true) {
                 $boolFast = $this->_fastBackend->remove($id);
+                if (!$boolFast && !$this->_fastBackend->test($id)) {
+                    // some backends return false on remove() even if the key never existed. (and it won't if fast is full)
+                    // all we care about is that the key doesn't exist now
+                    $boolFast = true;
+                }
             }
         }
 

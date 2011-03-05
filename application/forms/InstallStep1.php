@@ -3,24 +3,29 @@
 class Default_Form_InstallStep1 extends Zend_Dojo_Form {
 
     public $adaptors = array();
+    public $request;
 
     public function __construct($options = null) {
         if (isset($options['adaptors'])) {
             $this->adaptors = (array) $options['adaptors'];
         }
+        if (isset($options['request'])) {
+            // Should be on the same line but too long to fit
+            $httpClassName = 'Zend_Controller_Request_Http';
+            if (get_class($options['request']) === $httpClassName) {
+                $this->request = $options['request'];
+            }
+        }
         parent::__construct($options);
     }
 
     public function init() {
-        // custom validation
+        // Custom validation
         Zend_Dojo::enableForm($this);
         // Set the method for the display form to POST
         $this->setMethod('post');
 
-        // Really? I really have to do?
-        $front = Zend_Controller_Front::getInstance();
-        $request = $front->getRequest();
-        $adaptorType = $request->get('adaptorType');
+        $adaptorType = $this->request->get('adaptorType');
         $isRequired = $adaptorType !== 'pdo_sqlite';
 
         $this->addElement('FilteringSelect', 'adaptorType', array(
@@ -56,9 +61,11 @@ class Default_Form_InstallStep1 extends Zend_Dojo_Form {
             'required' => true,
             'disabled' => true
         ));
+
         $element = $this->getElement('writable');
         $element->addPrefixPath('ZendTickets_Validate', 'ZendTickets/Validate/', 'validate');
         $element->addValidator('WritableFolder', null, 'data');
+        $element->setChecked($element->isValid('data'));
 
 
         // Add the submit button

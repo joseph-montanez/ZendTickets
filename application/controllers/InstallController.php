@@ -60,7 +60,8 @@ class InstallController extends Zend_Controller_Action {
 
         // Generate Form
         $form = new Default_Form_InstallStep1(array(
-                    'adaptors' => $adaptors
+                    'adaptors' => $adaptors,
+                    'request' => $request
                 ));
 
         // Fill in form
@@ -76,26 +77,55 @@ class InstallController extends Zend_Controller_Action {
             $path = realpath(getcwd() . '/data');
             $dbPath = $path . '/db';
             $logPath = $path . '/log';
-            mkdir($dbPath);
-            mkdir($logPath);
-            chmod($dbPath, 0777);
-            chmod($logPath, 0777);
+
+            // Create directories
+            if (!is_dir($dbPath)) {
+                mkdir($dbPath);
+                chmod($dbPath, 0777);
+            }
+            if (!is_dir($logPath)) {
+                mkdir($logPath);
+                chmod($logPath, 0777);
+            }
 
             $schemaFile = false;
             $adaptorType = $request->getParam('adaptorType');
+            $allocationType = 'server';
             if (stristr($adaptorType, 'sqlite')) {
                 $schemaFile = 'schema.sqlite.sql';
+                $allocationType = 'file';
+            } else if (stristr($adaptorType, 'mysql')) {
+                $schemaFile = 'schema.mysql.sql';
             }
+
             if ($schemaFile !== false) {
                 $schemaFile = realpath(getcwd() . '/../scripts/' . $schemaFile);
-                $dbFile = $dbPath . '/tickets.db';
+                $dbName = '';
+
+                // Get database name
+                if ($allocationType === 'file') {
+                    $dbName = $dbPath . '/tickets.db';
+                } else {
+                    $dbName = $request->getParam('dbName');
+                }
+
+                // Remove the older installtion if present
                 if (is_file($dbFile) and is_writable($dbFile)) {
                     unlink($dbFile);
                 }
+
+                // Get adapter
                 $dbAdapter = Zend_Db::factory($adaptorType, array(
-                            'dbname' => $dbFile,
+                            'dbname' => $dbName,
+                            'dbusername' => $request->getParam('dbUsername'),
+                            'dbpassword' => $request->getParam('dbUsername'),
+                            'dbserver' => $request->getParam('dbServer')
                         ));
+
+                // Read Schema
                 $schemaSql = file_get_contents($schemaFile);
+
+                // Apply Schema to Database
                 $dbAdapter->getConnection()->exec($schemaSql);
             }
             return $this->_helper->redirector('step-two');

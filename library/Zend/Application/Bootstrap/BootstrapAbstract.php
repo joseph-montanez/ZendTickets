@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Application
  * @subpackage Bootstrap
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: BootstrapAbstract.php 22125 2010-05-05 22:23:05Z hobodave $
+ * @version    $Id: BootstrapAbstract.php 23775 2011-03-01 17:25:24Z ralph $
  */
 
 /**
@@ -28,7 +28,7 @@
  * @category   Zend
  * @package    Zend_Application
  * @subpackage Bootstrap
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Application_Bootstrap_BootstrapAbstract
@@ -95,7 +95,7 @@ abstract class Zend_Application_Bootstrap_BootstrapAbstract
      *
      * @param  Zend_Application|Zend_Application_Bootstrap_Bootstrapper $application
      * @return void
-     * @throws Zend_Application_Bootstrap_Exception When invalid applicaiton is provided
+     * @throws Zend_Application_Bootstrap_Exception When invalid application is provided
      */
     public function __construct($application)
     {
@@ -163,7 +163,7 @@ abstract class Zend_Application_Bootstrap_BootstrapAbstract
      */
     public function hasOption($key)
     {
-        return in_array($key, $this->_optionKeys);
+        return in_array(strtolower($key), $this->_optionKeys);
     }
 
     /**
@@ -414,7 +414,8 @@ abstract class Zend_Application_Bootstrap_BootstrapAbstract
     {
         if ($this->_pluginLoader === null) {
             $options = array(
-                'Zend_Application_Resource' => 'Zend/Application/Resource'
+                'Zend_Application_Resource'  => 'Zend/Application/Resource',
+                'ZendX_Application_Resource' => 'ZendX/Application/Resource'
             );
 
             $this->_pluginLoader = new Zend_Loader_PluginLoader($options);
